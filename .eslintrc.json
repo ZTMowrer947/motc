@@ -13,6 +13,12 @@
     "plugin:prettier/recommended"
   ],
   "overrides": [
+    {
+      "files": ["**/*Slice.[jt]s"],
+      "rules": {
+        "no-param-reassign": "off"
+      }
+    }
   ],
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
