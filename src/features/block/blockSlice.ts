@@ -50,12 +50,15 @@ const blockSlice = createSlice({
     translateActiveBlock(state, { payload }: PayloadAction<TranslateBlockPayload>) {
       if (state.active) {
         const { dx, dy } = payload;
-        Object.keys(state.active.coordinates).forEach((key) => {
-          const y = Number.parseInt(key, 10);
 
-          state.active!.coordinates[y + dy] = state.active!.coordinates[y].map((x) => x + dx);
-          delete state.active!.coordinates[y];
-        });
+        state.active.coordinates = Object.fromEntries(
+          Object.entries<number[]>(state.active.coordinates).map<[number, number[]]>(([key, xs]) => {
+            const y = Number.parseInt(key, 10);
+            const newXs = xs.map((x) => x + dx);
+
+            return [y + dy, newXs];
+          })
+        );
       }
     },
     rotateActiveBlock(state) {
