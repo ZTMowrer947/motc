@@ -1,4 +1,10 @@
-import blockReducer, { BlockState, fillActiveBlock, fillBag, translateActiveBlock } from './blockSlice';
+import blockReducer, {
+  BlockState,
+  fillActiveBlock,
+  fillBag,
+  lockActiveBlock,
+  translateActiveBlock,
+} from './blockSlice';
 import { BlockType } from './blockAPI';
 
 describe('block reducer', () => {
@@ -111,6 +117,39 @@ describe('block reducer', () => {
 
     // Act
     const action = fillBag(nextBag);
+
+    const finalState = blockReducer(initialState, action);
+
+    // Assert
+    expect(finalState).toEqual(expectedState);
+  });
+
+  it('should properly handle lockActiveBlock', () => {
+    // Arrange
+    const initialState: BlockState = {
+      active: {
+        type: 'I',
+        coordinates: {
+          0: [3, 4, 5, 6],
+        },
+        rotationDelta: 0,
+      },
+      occupied: {},
+      nextBlocks: [],
+      lineClears: 0,
+    };
+
+    const expectedState: BlockState = {
+      active: null,
+      occupied: {
+        0: [3, 4, 5, 6],
+      },
+      nextBlocks: [],
+      lineClears: 0,
+    };
+
+    // Act
+    const action = lockActiveBlock();
 
     const finalState = blockReducer(initialState, action);
 

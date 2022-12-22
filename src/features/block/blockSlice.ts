@@ -64,10 +64,22 @@ const blockSlice = createSlice({
     fillBag(state, { payload }: PayloadAction<BlockType[]>) {
       state.nextBlocks = payload;
     },
+    lockActiveBlock(state) {
+      if (state.active) {
+        Object.entries<number[]>(state.active.coordinates).forEach(([key, xs]) => {
+          const y = Number.parseInt(key, 10);
+
+          state.occupied[y] = [...xs];
+        });
+
+        state.active = null;
+      }
+    },
   },
 });
 
-export const { fillActiveBlock, translateActiveBlock, rotateActiveBlock, fillBag } = blockSlice.actions;
+export const { fillActiveBlock, translateActiveBlock, rotateActiveBlock, fillBag, lockActiveBlock } =
+  blockSlice.actions;
 
 export type BlockState = Readonly<ReturnType<typeof blockSlice.reducer>>;
 export default blockSlice.reducer;
