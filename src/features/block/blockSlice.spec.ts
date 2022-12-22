@@ -31,7 +31,7 @@ describe('block reducer', () => {
       active: {
         type: 'I',
         coordinates: {
-          20: [3, 4, 5, 6],
+          21: [3, 4, 5, 6],
         },
         rotationDelta: 0,
       },
@@ -55,7 +55,7 @@ describe('block reducer', () => {
       active: {
         type: 'I',
         coordinates: {
-          20: [3, 4, 5, 6],
+          21: [3, 4, 5, 6],
         },
         rotationDelta: 0,
       },
@@ -68,7 +68,7 @@ describe('block reducer', () => {
       active: {
         type: 'I',
         coordinates: {
-          19: [3, 4, 5, 6],
+          20: [3, 4, 5, 6],
         },
         rotationDelta: 0,
       },

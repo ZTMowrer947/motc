@@ -1,5 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import type { BlockType, CoordinateMap } from './blockAPI';
+import { getInitialCoordinatesForBlock } from './blockAPI';
 
 interface ActiveBlockData {
   coordinates: CoordinateMap;
@@ -22,16 +23,46 @@ const blockSlice = createSlice({
   },
   reducers: {
     fillActiveBlock(state) {
-      // TODO: Actually set the block
+      // Grab the next block in line
+      const nextBlock = state.nextBlocks.shift();
+
+      // Ensure such a block was actually available before continuing
+      if (nextBlock) {
+        const coordinates = getInitialCoordinatesForBlock(nextBlock);
+
+        const coordinateMap = coordinates.reduce((map, [x, y]) => {
+          if (y in map) {
+            map[y] = [...map[y], x];
+          } else {
+            map[y] = [x];
+          }
+
+          return map;
+        }, {} as CoordinateMap);
+
+        state.active = {
+          type: nextBlock,
+          coordinates: coordinateMap,
+          rotationDelta: 0,
+        };
+      }
     },
     translateActiveBlock(state, { payload }: PayloadAction<TranslateBlockPayload>) {
-      // TODO: Actually move a block
+      if (state.active) {
+        const { dx, dy } = payload;
+        Object.keys(state.active.coordinates).forEach((key) => {
+          const y = Number.parseInt(key, 10);
+
+          state.active!.coordinates[y + dy] = state.active!.coordinates[y].map((x) => x + dx);
+          delete state.active!.coordinates[y];
+        });
+      }
     },
     rotateActiveBlock(state) {
       // TODO: Rotate block
     },
     fillBag(state, { payload }: PayloadAction<BlockType[]>) {
-      // TODO: Actually refill the block bag
+      state.nextBlocks = payload;
     },
   },
 });
