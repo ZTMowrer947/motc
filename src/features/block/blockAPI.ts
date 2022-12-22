@@ -18,7 +18,7 @@ export function getInitialCoordinatesForBlock(type: BlockType): Coordinate[] {
         [4, 21],
         [4, 20],
         [5, 21],
-        [6, 20],
+        [5, 20],
       ];
     }
 
@@ -67,6 +67,7 @@ export function getInitialCoordinatesForBlock(type: BlockType): Coordinate[] {
       ];
     }
 
+    /* istanbul ignore next */
     default: {
       return [];
     }

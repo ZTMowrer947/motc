@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import type { BlockType, CoordinateMap } from './blockAPI';
-import { getInitialCoordinatesForBlock } from './blockAPI';
+import { BlockType, CoordinateMap, getInitialCoordinatesForBlock } from './blockAPI';
 
+// Types
 interface ActiveBlockData {
   coordinates: CoordinateMap;
   type: BlockType;
@@ -13,6 +13,7 @@ interface TranslateBlockPayload {
   dy: number;
 }
 
+// Slice
 const blockSlice = createSlice({
   name: 'block',
   initialState: {
@@ -81,8 +82,10 @@ const blockSlice = createSlice({
   },
 });
 
+// Actions
 export const { fillActiveBlock, translateActiveBlock, rotateActiveBlock, fillBag, lockActiveBlock } =
   blockSlice.actions;
 
+// Reducer
 export type BlockState = Readonly<ReturnType<typeof blockSlice.reducer>>;
 export default blockSlice.reducer;
