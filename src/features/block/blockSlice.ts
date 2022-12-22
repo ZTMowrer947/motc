@@ -36,5 +36,7 @@ const blockSlice = createSlice({
   },
 });
 
+export const { fillActiveBlock, translateActiveBlock, rotateActiveBlock, fillBag } = blockSlice.actions;
+
 export type BlockState = Readonly<ReturnType<typeof blockSlice.reducer>>;
 export default blockSlice.reducer;
