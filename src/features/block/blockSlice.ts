@@ -68,6 +68,37 @@ const blockSlice = createSlice({
     },
     rotateActiveBlock(state, { payload }: PayloadAction<RotateBlockPayload>) {
       if (state.active) {
+        const { type: blockType, rotationDelta } = state.active;
+
+        // Handle the block rotation
+        if (blockType === 'I') {
+          if (rotationDelta % 2 === 0) {
+            // Get the sole y coordinate
+            const y = Object.keys(state.active.coordinates).map((key) => Number.parseInt(key, 10))[0];
+
+            // Get a sorted copy of the x coordinates
+            const xs = [...state.active.coordinates[y]].sort((a, b) => a - b);
+
+            // Use rotation to select final x and the fourth y coordinate
+            const selectionIndex = rotationDelta === 0 ? 2 : 1;
+            const finalY = rotationDelta === 0 ? y - 2 : y + 2;
+
+            const x = xs[selectionIndex];
+
+            // Update coordinates
+            state.active.coordinates = {
+              [y + 1]: [x],
+              [y]: [x],
+              [y - 1]: [x],
+              [finalY]: [x],
+            };
+          }
+
+          // TODO: Handle other rotation deltas
+        }
+        // TODO: Handle other block types
+
+        // Update the rotation delta
         let nextDelta = state.active.rotationDelta;
 
         if (payload.direction === 'clockwise') {
@@ -86,7 +117,6 @@ const blockSlice = createSlice({
 
         state.active.rotationDelta = nextDelta as 0 | 1 | 2 | 3;
       }
-      // TODO: Actually rotate the block
     },
     fillBag(state, { payload }: PayloadAction<BlockType[]>) {
       state.nextBlocks = payload;
