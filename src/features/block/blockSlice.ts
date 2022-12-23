@@ -92,9 +92,32 @@ const blockSlice = createSlice({
               [y - 1]: [x],
               [finalY]: [x],
             };
-          }
+          } else {
+            // Get sorted copy of all x coordinates
+            const allXs = Object.values(state.active.coordinates)
+              .flat()
+              .sort((a, b) => a - b);
 
-          // TODO: Handle other rotation deltas
+            // Find the x coordinate present 4 times
+            const xIndex = allXs.slice(0, allXs.length - 3).findIndex((x, idx) => x === allXs[idx + 3]);
+            const sharedX = allXs[xIndex];
+
+            // Get a sorted copy of all y coordinates
+            const ys = Object.keys(state.active.coordinates)
+              .map((key) => Number.parseInt(key, 10))
+              .sort((a, b) => a - b);
+
+            // Use rotation to select final y and the fourth x coordinate
+            const selectionIndex = rotationDelta === 1 ? 1 : 2;
+            const y = ys[selectionIndex];
+            const finalX = rotationDelta === 1 ? sharedX - 2 : sharedX + 2;
+            const finalXs = [sharedX - 1, sharedX, sharedX + 1, finalX].sort();
+
+            // Update coordinates
+            state.active.coordinates = {
+              [y]: finalXs,
+            };
+          }
         }
         // TODO: Handle other block types
 
