@@ -88,7 +88,17 @@ const blockSlice = createSlice({
             const xs = [...state.active.coordinates[y]].sort((a, b) => a - b);
 
             // Use rotation to select final x and the fourth y coordinate
-            const selectionIndex = rotationDelta === 0 ? 2 : 1;
+            let selectionIndex: number;
+
+            if (
+              (rotationDelta === 0 && payload.direction === 'clockwise') ||
+              (rotationDelta === 2 && payload.direction === 'counterclockwise')
+            ) {
+              selectionIndex = 2;
+            } else {
+              selectionIndex = 1;
+            }
+
             const finalY = rotationDelta === 0 ? y - 2 : y + 2;
 
             const x = xs[selectionIndex];
@@ -106,7 +116,16 @@ const blockSlice = createSlice({
             const sharedX = allXs[xIndex];
 
             // Use rotation to select final y and the fourth x coordinate
-            const selectionIndex = rotationDelta === 1 ? 1 : 2;
+            let selectionIndex: number;
+
+            if (
+              (rotationDelta === 1 && payload.direction === 'clockwise') ||
+              (rotationDelta === 3 && payload.direction === 'counterclockwise')
+            ) {
+              selectionIndex = 1;
+            } else {
+              selectionIndex = 2;
+            }
             const y = ys[selectionIndex];
             const finalX = rotationDelta === 1 ? sharedX - 2 : sharedX + 2;
             const finalXs = [sharedX - 1, sharedX, sharedX + 1, finalX].sort();
