@@ -67,7 +67,26 @@ const blockSlice = createSlice({
       }
     },
     rotateActiveBlock(state, { payload }: PayloadAction<RotateBlockPayload>) {
-      // TODO: Rotate block
+      if (state.active) {
+        let nextDelta = state.active.rotationDelta;
+
+        if (payload.direction === 'clockwise') {
+          nextDelta += 1;
+
+          if (nextDelta > 3) {
+            nextDelta = 0;
+          }
+        } else {
+          nextDelta -= 1;
+
+          if (nextDelta < 0) {
+            nextDelta = 3;
+          }
+        }
+
+        state.active.rotationDelta = nextDelta as 0 | 1 | 2 | 3;
+      }
+      // TODO: Actually rotate the block
     },
     fillBag(state, { payload }: PayloadAction<BlockType[]>) {
       state.nextBlocks = payload;
