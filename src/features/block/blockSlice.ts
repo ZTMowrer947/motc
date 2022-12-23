@@ -176,8 +176,44 @@ const blockSlice = createSlice({
               [y]: [...(coordinateMap[y] ?? []), x].sort((a, b) => a - b),
             };
           }, {} as CoordinateMap);
+        } else if (['S', 'Z'].includes(blockType)) {
+          let centerBlock: Coordinate;
+
+          if (rotationDelta % 2 === 0) {
+            const sharedXIndex = allXs.slice(0, allXs.length - 1).findIndex((x, idx) => x === allXs[idx + 1]);
+            const sharedX = allXs[sharedXIndex];
+            const centerYIndex = rotationDelta === 0 ? 0 : 1;
+            const centerY = ys[centerYIndex];
+
+            centerBlock = [sharedX, centerY];
+          } else {
+            const sharedYIndex = ys.findIndex((y) => state.active?.coordinates[y].length === 2);
+            const sharedY = ys[sharedYIndex];
+            const centerXIndex = rotationDelta === 1 ? 0 : 1;
+            const centerX = state.active.coordinates[sharedY][centerXIndex];
+
+            centerBlock = [centerX, sharedY];
+          }
+
+          // Convert coordinate map into array of coordinates
+          const coordinateArray = Object.keys(state.active.coordinates)
+            .map((key) => Number.parseInt(key, 10))
+            .flatMap((y) => (state.active?.coordinates[y] ?? []).map<Coordinate>((x) => [x, y]));
+
+          // Rotate each coordinate relative to the central block
+          const rotatedCoordinateArray = coordinateArray
+            .map(([x, y]) => [x - centerBlock[0], y - centerBlock[1]])
+            .map(([x, y]) => (payload.direction === 'clockwise' ? [y, -x] : [-y, x]))
+            .map<Coordinate>(([x, y]) => [x + centerBlock[0], y + centerBlock[1]]);
+
+          // Convert the rotated coordinates back into a map structure
+          state.active.coordinates = rotatedCoordinateArray.reduce((coordinateMap, [x, y]) => {
+            return {
+              ...coordinateMap,
+              [y]: [...(coordinateMap[y] ?? []), x].sort((a, b) => a - b),
+            };
+          }, {} as CoordinateMap);
         }
-        // TODO: Handle other block types
 
         // Update the rotation delta
         let nextDelta = state.active.rotationDelta;
