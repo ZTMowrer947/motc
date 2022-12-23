@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { BlockType, CoordinateMap, getInitialCoordinatesForBlock } from './blockAPI';
+import { BlockType, Coordinate, CoordinateMap, getInitialCoordinatesForBlock } from './blockAPI';
 
 // Types
 interface ActiveBlockData {
@@ -70,6 +70,14 @@ const blockSlice = createSlice({
       if (state.active) {
         const { type: blockType, rotationDelta } = state.active;
 
+        const allXs = Object.values(state.active.coordinates)
+          .flat()
+          .sort((a, b) => a - b);
+
+        const ys = Object.keys(state.active.coordinates)
+          .map((key) => Number.parseInt(key, 10))
+          .sort((a, b) => a - b);
+
         // Handle the block rotation
         if (blockType === 'I') {
           if (rotationDelta % 2 === 0) {
@@ -93,19 +101,9 @@ const blockSlice = createSlice({
               [finalY]: [x],
             };
           } else {
-            // Get sorted copy of all x coordinates
-            const allXs = Object.values(state.active.coordinates)
-              .flat()
-              .sort((a, b) => a - b);
-
             // Find the x coordinate present 4 times
             const xIndex = allXs.slice(0, allXs.length - 3).findIndex((x, idx) => x === allXs[idx + 3]);
             const sharedX = allXs[xIndex];
-
-            // Get a sorted copy of all y coordinates
-            const ys = Object.keys(state.active.coordinates)
-              .map((key) => Number.parseInt(key, 10))
-              .sort((a, b) => a - b);
 
             // Use rotation to select final y and the fourth x coordinate
             const selectionIndex = rotationDelta === 1 ? 1 : 2;
@@ -118,6 +116,47 @@ const blockSlice = createSlice({
               [y]: finalXs,
             };
           }
+        } else if (['T', 'L', 'J'].includes(blockType)) {
+          let centerBlock: Coordinate;
+
+          if (rotationDelta % 2 === 0) {
+            // Find index of central y-coordinate
+            const centerYIndex = ys.findIndex((y) => state.active?.coordinates[y].length === 3);
+            const centerY = ys[centerYIndex];
+
+            // Get central x-coordinate
+            const centerX = state.active.coordinates[centerY][1];
+
+            centerBlock = [centerX, centerY];
+          } else {
+            // Find index of central x-coordinate
+            const centerXIndex = allXs.slice(0, allXs.length - 2).findIndex((x, idx) => x === allXs[idx + 2]);
+            const centerX = allXs[centerXIndex];
+
+            // Get central y-coordinate
+            const centerY = ys[1];
+
+            centerBlock = [centerX, centerY];
+          }
+
+          // Convert coordinate map into array of coordinates
+          const coordinateArray = Object.keys(state.active.coordinates)
+            .map((key) => Number.parseInt(key, 10))
+            .flatMap((y) => (state.active?.coordinates[y] ?? []).map<Coordinate>((x) => [x, y]));
+
+          // Rotate each coordinate relative to the central block
+          const rotatedCoordinateArray = coordinateArray
+            .map(([x, y]) => [x - centerBlock[0], y - centerBlock[1]])
+            .map(([x, y]) => (payload.direction === 'clockwise' ? [y, -x] : [-y, x]))
+            .map<Coordinate>(([x, y]) => [x + centerBlock[0], y + centerBlock[1]]);
+
+          // Convert the rotated coordinates back into a map structure
+          state.active.coordinates = rotatedCoordinateArray.reduce((coordinateMap, [x, y]) => {
+            return {
+              ...coordinateMap,
+              [y]: [...(coordinateMap[y] ?? []), x].sort((a, b) => a - b),
+            };
+          }, {} as CoordinateMap);
         }
         // TODO: Handle other block types
 
