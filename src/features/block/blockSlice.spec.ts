@@ -3,6 +3,7 @@ import blockReducer, {
   fillActiveBlock,
   fillBag,
   lockActiveBlock,
+  rotateActiveBlock,
   translateActiveBlock,
 } from './blockSlice';
 import type { BlockType, CoordinateMap } from './blockAPI';
@@ -10,6 +11,11 @@ import type { BlockType, CoordinateMap } from './blockAPI';
 interface FillActiveBlockSourceEntry {
   blockType: BlockType;
   expectedCoordinates: CoordinateMap;
+}
+
+interface RotateActiveBlockSourceEntry {
+  blockType: BlockType;
+  possibleCoordinates: CoordinateMap[];
 }
 
 describe('block reducer', () => {
@@ -153,7 +159,204 @@ describe('block reducer', () => {
     expect(finalState).toEqual(expectedState);
   });
 
-  it.todo('should properly handle rotateActiveBlock');
+  // Configure test case data for block rotation test
+  const rotateActiveBlockSourceData: RotateActiveBlockSourceEntry[] = [
+    {
+      blockType: 'I',
+      possibleCoordinates: [
+        {
+          10: [3, 4, 5, 6],
+        },
+        {
+          11: [5],
+          10: [5],
+          9: [5],
+          8: [5],
+        },
+        {
+          9: [3, 4, 5, 6],
+        },
+        {
+          11: [4],
+          10: [4],
+          9: [4],
+          8: [4],
+        },
+      ],
+    },
+    {
+      blockType: 'O',
+      possibleCoordinates: Array.from({ length: 4 }, () => ({
+        10: [4, 5],
+        9: [4, 5],
+      })),
+    },
+    {
+      blockType: 'T',
+      possibleCoordinates: [
+        {
+          10: [4],
+          9: [3, 4, 5],
+        },
+        {
+          10: [4],
+          9: [4, 5],
+          8: [4],
+        },
+        {
+          10: [3, 4, 5],
+          9: [4],
+        },
+        {
+          10: [4],
+          9: [3, 4],
+          8: [4],
+        },
+      ],
+    },
+    {
+      blockType: 'L',
+      possibleCoordinates: [
+        {
+          10: [5],
+          9: [3, 4, 5],
+        },
+        {
+          10: [4],
+          9: [4],
+          8: [4, 5],
+        },
+        {
+          10: [3, 4, 5],
+          9: [3],
+        },
+        {
+          10: [3, 4],
+          9: [4],
+          8: [4],
+        },
+      ],
+    },
+    {
+      blockType: 'J',
+      possibleCoordinates: [
+        {
+          10: [3],
+          9: [3, 4, 5],
+        },
+        {
+          10: [4],
+          9: [4],
+          8: [3, 4],
+        },
+        {
+          10: [3, 4, 5],
+          9: [5],
+        },
+        {
+          10: [4, 5],
+          9: [4],
+          8: [4],
+        },
+      ],
+    },
+    {
+      blockType: 'S',
+      possibleCoordinates: [
+        {
+          10: [4, 5],
+          9: [3, 4],
+        },
+        {
+          10: [4],
+          9: [4, 5],
+          8: [5],
+        },
+        {
+          9: [4, 5],
+          8: [3, 4],
+        },
+        {
+          10: [3],
+          9: [3, 4],
+          8: [4],
+        },
+      ],
+    },
+    {
+      blockType: 'Z',
+      possibleCoordinates: [
+        {
+          10: [3, 4],
+          9: [4, 5],
+        },
+        {
+          10: [5],
+          9: [4, 5],
+          8: [4],
+        },
+        {
+          9: [3, 4],
+          8: [4, 5],
+        },
+        {
+          10: [4],
+          9: [3, 4],
+          8: [3],
+        },
+      ],
+    },
+  ];
+  const directions = ['clockwise', 'counterclockwise'] as const;
+
+  directions.forEach((direction) => {
+    rotateActiveBlockSourceData.forEach(({ blockType, possibleCoordinates }) => {
+      possibleCoordinates.forEach((initialCoordinates, rotationDelta) => {
+        let nextDelta: number;
+
+        if (direction === 'clockwise') {
+          nextDelta = rotationDelta + 1 < 4 ? rotationDelta + 1 : 0;
+        } else {
+          nextDelta = rotationDelta - 1 >= 0 ? rotationDelta - 1 : 3;
+        }
+
+        const expectedCoordinates = possibleCoordinates[nextDelta];
+
+        it(`should properly handle rotateActiveBlock rotating an ${blockType}-block at rotation ${rotationDelta} ${direction}`, () => {
+          // Arrange
+          const initialState: BlockState = {
+            active: {
+              type: blockType,
+              coordinates: initialCoordinates,
+              rotationDelta: rotationDelta as 0 | 1 | 2 | 3,
+            },
+            occupied: {},
+            nextBlocks: [],
+            lineClears: 0,
+          };
+
+          const expectedState: BlockState = {
+            active: {
+              type: blockType,
+              coordinates: expectedCoordinates,
+              rotationDelta: nextDelta as 0 | 1 | 2 | 3,
+            },
+            occupied: {},
+            nextBlocks: [],
+            lineClears: 0,
+          };
+
+          // Act
+          const action = rotateActiveBlock({ direction });
+
+          const finalState = blockReducer(initialState, action);
+
+          // Assert
+          expect(finalState).toEqual(expectedState);
+        });
+      });
+    });
+  });
 
   it('should properly handle fillBag', () => {
     // Arrange

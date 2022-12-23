@@ -13,6 +13,10 @@ interface TranslateBlockPayload {
   dy: number;
 }
 
+interface RotateBlockPayload {
+  direction: 'clockwise' | 'counterclockwise';
+}
+
 // Slice
 const blockSlice = createSlice({
   name: 'block',
@@ -62,7 +66,7 @@ const blockSlice = createSlice({
         );
       }
     },
-    rotateActiveBlock(state) {
+    rotateActiveBlock(state, { payload }: PayloadAction<RotateBlockPayload>) {
       // TODO: Rotate block
     },
     fillBag(state, { payload }: PayloadAction<BlockType[]>) {
