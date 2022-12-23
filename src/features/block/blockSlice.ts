@@ -1,12 +1,14 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createSelector, createSlice, PayloadAction } from '@reduxjs/toolkit';
 import {
   BlockType,
+  Coordinate,
   CoordinateCollection,
   CoordinateMap,
   getInitialCoordinatesForBlock,
   rotateBlock,
   translateBlock,
 } from './blockAPI';
+import type { RootState } from '../../app/store';
 
 // Types
 export interface ActiveBlockData {
@@ -135,6 +137,19 @@ const blockSlice = createSlice({
 // Actions
 export const { fillActiveBlock, translateActiveBlock, rotateActiveBlock, fillBag, lockActiveBlock } =
   blockSlice.actions;
+
+// Selectors
+export const selectActiveBlockXCoordinatesByY = (state: RootState) => state.block.active?.coordinates.byY;
+export const selectActiveBlockYCoordinates = (state: RootState) => state.block.active?.coordinates.allYs;
+
+export const selectActiveBlockCoordinates = createSelector(
+  [selectActiveBlockXCoordinatesByY, selectActiveBlockYCoordinates],
+  (byY, allYs) => {
+    if (!byY || !allYs) return [];
+
+    return allYs.flatMap((y) => byY[y].map<Coordinate>((x) => [x, y]));
+  }
+);
 
 // Reducer
 export type BlockState = Readonly<ReturnType<typeof blockSlice.reducer>>;

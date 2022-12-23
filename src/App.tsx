@@ -1,13 +1,30 @@
-import React, { useState } from 'react';
+import React, { useEffect } from 'react';
 import Canvas from './features/drawing/Canvas';
+import { useAppDispatch, useAppSelector } from './app/hooks';
+import {
+  fillActiveBlock,
+  fillBag,
+  selectActiveBlockCoordinates,
+  translateActiveBlock,
+} from './features/block/blockSlice';
 
 function App() {
+  const activeBlock = useAppSelector((state) => state.block.active);
+  const coordinates = useAppSelector(selectActiveBlockCoordinates);
+  const nextBlocks = useAppSelector((state) => state.block.nextBlocks);
+  const dispatch = useAppDispatch();
+
   const height = window.innerHeight - 50;
   const width = height / 2 + 400;
   const sideLength = height / 20;
 
-  const [x] = useState(5);
-  const [y, setY] = useState(21);
+  useEffect(() => {
+    if (nextBlocks.length === 0) {
+      dispatch(fillBag(['I']));
+    } else if (!activeBlock) {
+      dispatch(fillActiveBlock());
+    }
+  });
 
   return (
     <Canvas
@@ -19,18 +36,23 @@ function App() {
 
         ctx.fillRect(200, 0, ctx.canvas.height / 2, ctx.canvas.height);
 
-        const realX = 200 + x * sideLength;
-        const realY = (20 - y) * sideLength;
+        if (activeBlock) {
+          ctx.fillStyle = 'blue';
+          ctx.strokeStyle = 'gray';
+          ctx.lineWidth = 1;
 
-        if (frame % 60 === 19) {
-          setY((prevY) => prevY - 1);
+          if (frame % 60 === 19) {
+            dispatch(translateActiveBlock({ dx: 0, dy: -1 }));
+          }
+
+          coordinates.forEach(([x, y]) => {
+            const realX = 200 + x * sideLength;
+            const realY = (20 - y) * sideLength;
+
+            ctx.fillRect(realX, realY, sideLength, sideLength);
+            ctx.strokeRect(realX, realY, sideLength, sideLength);
+          });
         }
-
-        ctx.fillStyle = 'blue';
-        ctx.strokeStyle = 'gray';
-        ctx.lineWidth = 1;
-        ctx.fillRect(realX, realY, sideLength, sideLength);
-        ctx.strokeRect(realX, realY, sideLength, sideLength);
 
         ctx.font = '20px sans-serif';
         ctx.fillStyle = 'white';
