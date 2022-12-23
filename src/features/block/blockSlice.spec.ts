@@ -6,16 +6,16 @@ import blockReducer, {
   rotateActiveBlock,
   translateActiveBlock,
 } from './blockSlice';
-import type { BlockType, CoordinateMap } from './blockAPI';
+import type { BlockType, CoordinateCollection } from './blockAPI';
 
 interface FillActiveBlockSourceEntry {
   blockType: BlockType;
-  expectedCoordinates: CoordinateMap;
+  expectedCoordinates: CoordinateCollection;
 }
 
 interface RotateActiveBlockSourceEntry {
   blockType: BlockType;
-  possibleCoordinates: CoordinateMap[];
+  possibleCoordinates: CoordinateCollection[];
 }
 
 describe('block reducer', () => {
@@ -23,7 +23,10 @@ describe('block reducer', () => {
     // Arrange
     const expectedState: BlockState = {
       active: null,
-      occupied: {},
+      occupied: {
+        byY: {},
+        allYs: [],
+      },
       nextBlocks: [],
       lineClears: 0,
     };
@@ -40,49 +43,70 @@ describe('block reducer', () => {
     {
       blockType: 'I',
       expectedCoordinates: {
-        21: [3, 4, 5, 6],
+        byY: {
+          21: [3, 4, 5, 6],
+        },
+        allYs: [21],
       },
     },
     {
       blockType: 'O',
       expectedCoordinates: {
-        21: [4, 5],
-        20: [4, 5],
+        byY: {
+          21: [4, 5],
+          20: [4, 5],
+        },
+        allYs: [20, 21],
       },
     },
     {
       blockType: 'T',
       expectedCoordinates: {
-        21: [4],
-        20: [3, 4, 5],
+        byY: {
+          21: [4],
+          20: [3, 4, 5],
+        },
+        allYs: [20, 21],
       },
     },
     {
       blockType: 'L',
       expectedCoordinates: {
-        21: [5],
-        20: [3, 4, 5],
+        byY: {
+          21: [5],
+          20: [3, 4, 5],
+        },
+        allYs: [20, 21],
       },
     },
     {
       blockType: 'J',
       expectedCoordinates: {
-        21: [3],
-        20: [3, 4, 5],
+        byY: {
+          21: [3],
+          20: [3, 4, 5],
+        },
+        allYs: [20, 21],
       },
     },
     {
       blockType: 'S',
       expectedCoordinates: {
-        21: [4, 5],
-        20: [3, 4],
+        byY: {
+          21: [4, 5],
+          20: [3, 4],
+        },
+        allYs: [20, 21],
       },
     },
     {
       blockType: 'Z',
       expectedCoordinates: {
-        21: [3, 4],
-        20: [4, 5],
+        byY: {
+          21: [3, 4],
+          20: [4, 5],
+        },
+        allYs: [20, 21],
       },
     },
   ];
@@ -93,7 +117,10 @@ describe('block reducer', () => {
       // Arrange
       const initialState: BlockState = {
         active: null,
-        occupied: {},
+        occupied: {
+          byY: {},
+          allYs: [],
+        },
         nextBlocks: [blockType],
         lineClears: 0,
       };
@@ -104,7 +131,10 @@ describe('block reducer', () => {
           coordinates: expectedCoordinates,
           rotationDelta: 0,
         },
-        occupied: {},
+        occupied: {
+          byY: {},
+          allYs: [],
+        },
         nextBlocks: [],
         lineClears: 0,
       };
@@ -125,11 +155,17 @@ describe('block reducer', () => {
       active: {
         type: 'I',
         coordinates: {
-          21: [3, 4, 5, 6],
+          byY: {
+            21: [3, 4, 5, 6],
+          },
+          allYs: [21],
         },
         rotationDelta: 0,
       },
-      occupied: {},
+      occupied: {
+        byY: {},
+        allYs: [],
+      },
       nextBlocks: [],
       lineClears: 0,
     };
@@ -138,11 +174,17 @@ describe('block reducer', () => {
       active: {
         type: 'I',
         coordinates: {
-          20: [3, 4, 5, 6],
+          byY: {
+            20: [3, 4, 5, 6],
+          },
+          allYs: [20],
         },
         rotationDelta: 0,
       },
-      occupied: {},
+      occupied: {
+        byY: {},
+        allYs: [],
+      },
       nextBlocks: [],
       lineClears: 0,
     };
@@ -165,52 +207,79 @@ describe('block reducer', () => {
       blockType: 'I',
       possibleCoordinates: [
         {
-          10: [3, 4, 5, 6],
+          byY: {
+            10: [3, 4, 5, 6],
+          },
+          allYs: [10],
         },
         {
-          11: [5],
-          10: [5],
-          9: [5],
-          8: [5],
+          byY: {
+            11: [5],
+            10: [5],
+            9: [5],
+            8: [5],
+          },
+          allYs: [8, 9, 10, 11],
         },
         {
-          9: [3, 4, 5, 6],
+          byY: {
+            9: [3, 4, 5, 6],
+          },
+          allYs: [9],
         },
         {
-          11: [4],
-          10: [4],
-          9: [4],
-          8: [4],
+          byY: {
+            11: [4],
+            10: [4],
+            9: [4],
+            8: [4],
+          },
+          allYs: [8, 9, 10, 11],
         },
       ],
     },
     {
       blockType: 'O',
       possibleCoordinates: Array.from({ length: 4 }, () => ({
-        10: [4, 5],
-        9: [4, 5],
+        byY: {
+          10: [4, 5],
+          9: [4, 5],
+        },
+        allYs: [9, 10],
       })),
     },
     {
       blockType: 'T',
       possibleCoordinates: [
         {
-          10: [4],
-          9: [3, 4, 5],
+          byY: {
+            10: [4],
+            9: [3, 4, 5],
+          },
+          allYs: [9, 10],
         },
         {
-          10: [4],
-          9: [4, 5],
-          8: [4],
+          byY: {
+            10: [4],
+            9: [4, 5],
+            8: [4],
+          },
+          allYs: [8, 9, 10],
         },
         {
-          9: [3, 4, 5],
-          8: [4],
+          byY: {
+            9: [3, 4, 5],
+            8: [4],
+          },
+          allYs: [8, 9],
         },
         {
-          10: [4],
-          9: [3, 4],
-          8: [4],
+          byY: {
+            10: [4],
+            9: [3, 4],
+            8: [4],
+          },
+          allYs: [8, 9, 10],
         },
       ],
     },
@@ -218,22 +287,34 @@ describe('block reducer', () => {
       blockType: 'L',
       possibleCoordinates: [
         {
-          10: [5],
-          9: [3, 4, 5],
+          byY: {
+            10: [5],
+            9: [3, 4, 5],
+          },
+          allYs: [9, 10],
         },
         {
-          10: [4],
-          9: [4],
-          8: [4, 5],
+          byY: {
+            10: [4],
+            9: [4],
+            8: [4, 5],
+          },
+          allYs: [8, 9, 10],
         },
         {
-          9: [3, 4, 5],
-          8: [3],
+          byY: {
+            9: [3, 4, 5],
+            8: [3],
+          },
+          allYs: [8, 9],
         },
         {
-          10: [3, 4],
-          9: [4],
-          8: [4],
+          byY: {
+            10: [3, 4],
+            9: [4],
+            8: [4],
+          },
+          allYs: [8, 9, 10],
         },
       ],
     },
@@ -241,22 +322,34 @@ describe('block reducer', () => {
       blockType: 'J',
       possibleCoordinates: [
         {
-          10: [3],
-          9: [3, 4, 5],
+          byY: {
+            10: [3],
+            9: [3, 4, 5],
+          },
+          allYs: [9, 10],
         },
         {
-          10: [4, 5],
-          9: [4],
-          8: [4],
+          byY: {
+            10: [4, 5],
+            9: [4],
+            8: [4],
+          },
+          allYs: [8, 9, 10],
         },
         {
-          9: [3, 4, 5],
-          8: [5],
+          byY: {
+            9: [3, 4, 5],
+            8: [5],
+          },
+          allYs: [8, 9],
         },
         {
-          10: [4],
-          9: [4],
-          8: [3, 4],
+          byY: {
+            10: [4],
+            9: [4],
+            8: [3, 4],
+          },
+          allYs: [8, 9, 10],
         },
       ],
     },
@@ -264,22 +357,34 @@ describe('block reducer', () => {
       blockType: 'S',
       possibleCoordinates: [
         {
-          10: [4, 5],
-          9: [3, 4],
+          byY: {
+            10: [4, 5],
+            9: [3, 4],
+          },
+          allYs: [9, 10],
         },
         {
-          10: [4],
-          9: [4, 5],
-          8: [5],
+          byY: {
+            10: [4],
+            9: [4, 5],
+            8: [5],
+          },
+          allYs: [8, 9, 10],
         },
         {
-          9: [4, 5],
-          8: [3, 4],
+          byY: {
+            9: [4, 5],
+            8: [3, 4],
+          },
+          allYs: [8, 9],
         },
         {
-          10: [3],
-          9: [3, 4],
-          8: [4],
+          byY: {
+            10: [3],
+            9: [3, 4],
+            8: [4],
+          },
+          allYs: [8, 9, 10],
         },
       ],
     },
@@ -287,22 +392,34 @@ describe('block reducer', () => {
       blockType: 'Z',
       possibleCoordinates: [
         {
-          10: [3, 4],
-          9: [4, 5],
+          byY: {
+            10: [3, 4],
+            9: [4, 5],
+          },
+          allYs: [9, 10],
         },
         {
-          10: [5],
-          9: [4, 5],
-          8: [4],
+          byY: {
+            10: [5],
+            9: [4, 5],
+            8: [4],
+          },
+          allYs: [8, 9, 10],
         },
         {
-          9: [3, 4],
-          8: [4, 5],
+          byY: {
+            9: [3, 4],
+            8: [4, 5],
+          },
+          allYs: [8, 9],
         },
         {
-          10: [4],
-          9: [3, 4],
-          8: [3],
+          byY: {
+            10: [4],
+            9: [3, 4],
+            8: [3],
+          },
+          allYs: [8, 9, 10],
         },
       ],
     },
@@ -330,7 +447,10 @@ describe('block reducer', () => {
               coordinates: initialCoordinates,
               rotationDelta: rotationDelta as 0 | 1 | 2 | 3,
             },
-            occupied: {},
+            occupied: {
+              allYs: [],
+              byY: {},
+            },
             nextBlocks: [],
             lineClears: 0,
           };
@@ -341,7 +461,10 @@ describe('block reducer', () => {
               coordinates: expectedCoordinates,
               rotationDelta: nextDelta as 0 | 1 | 2 | 3,
             },
-            occupied: {},
+            occupied: {
+              allYs: [],
+              byY: {},
+            },
             nextBlocks: [],
             lineClears: 0,
           };
@@ -362,7 +485,10 @@ describe('block reducer', () => {
     // Arrange
     const initialState: BlockState = {
       active: null,
-      occupied: {},
+      occupied: {
+        byY: {},
+        allYs: [],
+      },
       nextBlocks: [],
       lineClears: 0,
     };
@@ -371,7 +497,10 @@ describe('block reducer', () => {
 
     const expectedState: BlockState = {
       active: null,
-      occupied: {},
+      occupied: {
+        byY: {},
+        allYs: [],
+      },
       nextBlocks: nextBag,
       lineClears: 0,
     };
@@ -391,11 +520,17 @@ describe('block reducer', () => {
       active: {
         type: 'I',
         coordinates: {
-          0: [3, 4, 5, 6],
+          byY: {
+            0: [3, 4, 5, 6],
+          },
+          allYs: [0],
         },
         rotationDelta: 0,
       },
-      occupied: {},
+      occupied: {
+        byY: {},
+        allYs: [],
+      },
       nextBlocks: [],
       lineClears: 0,
     };
@@ -403,7 +538,10 @@ describe('block reducer', () => {
     const expectedState: BlockState = {
       active: null,
       occupied: {
-        0: [3, 4, 5, 6],
+        byY: {
+          0: [3, 4, 5, 6],
+        },
+        allYs: [0],
       },
       nextBlocks: [],
       lineClears: 0,

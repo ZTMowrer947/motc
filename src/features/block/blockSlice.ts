@@ -1,9 +1,16 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { BlockType, CoordinateMap, getInitialCoordinatesForBlock, rotateBlock, translateBlock } from './blockAPI';
+import {
+  BlockType,
+  CoordinateCollection,
+  CoordinateMap,
+  getInitialCoordinatesForBlock,
+  rotateBlock,
+  translateBlock,
+} from './blockAPI';
 
 // Types
 export interface ActiveBlockData {
-  coordinates: CoordinateMap;
+  coordinates: CoordinateCollection;
   type: BlockType;
   rotationDelta: 0 | 1 | 2 | 3;
 }
@@ -22,7 +29,10 @@ const blockSlice = createSlice({
   name: 'block',
   initialState: {
     active: null as ActiveBlockData | null,
-    occupied: {} as CoordinateMap,
+    occupied: {
+      byY: {} as CoordinateMap,
+      allYs: [] as number[],
+    },
     nextBlocks: [] as BlockType[],
     lineClears: 0,
   },
@@ -33,21 +43,34 @@ const blockSlice = createSlice({
 
       // Ensure such a block was actually available before continuing
       if (nextBlock) {
-        const coordinates = getInitialCoordinatesForBlock(nextBlock);
+        const coordinateArray = getInitialCoordinatesForBlock(nextBlock);
 
-        const coordinateMap = coordinates.reduce((map, [x, y]) => {
-          if (y in map) {
-            map[y] = [...map[y], x];
-          } else {
-            map[y] = [x];
-          }
-
-          return map;
-        }, {} as CoordinateMap);
+        const coordinates = coordinateArray.reduce(
+          (currentCoordinates, [x, y]) => {
+            if (currentCoordinates.allYs.includes(y)) {
+              return {
+                ...currentCoordinates,
+                byY: {
+                  ...currentCoordinates.byY,
+                  [y]: [...currentCoordinates.byY[y], x],
+                },
+              };
+            }
+            return {
+              ...currentCoordinates,
+              allYs: [...currentCoordinates.allYs, y],
+              byY: {
+                ...currentCoordinates.byY,
+                [y]: [x],
+              },
+            };
+          },
+          { allYs: [], byY: {} } as CoordinateCollection
+        );
 
         state.active = {
           type: nextBlock,
-          coordinates: coordinateMap,
+          coordinates,
           rotationDelta: 0,
         };
       }
@@ -90,10 +113,17 @@ const blockSlice = createSlice({
     },
     lockActiveBlock(state) {
       if (state.active) {
-        Object.entries<number[]>(state.active.coordinates).forEach(([key, xs]) => {
-          const y = Number.parseInt(key, 10);
+        const { coordinates } = state.active;
 
-          state.occupied[y] = [...xs];
+        coordinates.allYs.forEach((y) => {
+          if (state.occupied.allYs.includes(y)) {
+            const newXs = coordinates.byY[y].filter((x) => !state.occupied.byY[y].includes(x));
+
+            state.occupied.byY[y] = [...state.occupied.byY[y], ...newXs];
+          } else {
+            state.occupied.allYs.push(y);
+            state.occupied.byY[y] = coordinates.byY[y];
+          }
         });
 
         state.active = null;

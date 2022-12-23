@@ -1,5 +1,9 @@
 export type Coordinate = [x: number, y: number];
 export type CoordinateMap = Record<number, number[]>;
+export type CoordinateCollection = {
+  allYs: number[];
+  byY: CoordinateMap;
+};
 export type BlockType = 'I' | 'O' | 'T' | 'L' | 'J' | 'S' | 'Z';
 
 export function getInitialCoordinatesForBlock(type: BlockType): Coordinate[] {
@@ -15,10 +19,10 @@ export function getInitialCoordinatesForBlock(type: BlockType): Coordinate[] {
 
     case 'O': {
       return [
-        [4, 21],
         [4, 20],
-        [5, 21],
         [5, 20],
+        [4, 21],
+        [5, 21],
       ];
     }
 
@@ -60,10 +64,10 @@ export function getInitialCoordinatesForBlock(type: BlockType): Coordinate[] {
 
     case 'Z': {
       return [
-        [3, 21],
-        [4, 21],
         [4, 20],
         [5, 20],
+        [3, 21],
+        [4, 21],
       ];
     }
 
@@ -74,36 +78,41 @@ export function getInitialCoordinatesForBlock(type: BlockType): Coordinate[] {
   }
 }
 
-export function translateBlock(coordinates: CoordinateMap, dx: number, dy: number) {
-  return Object.fromEntries(
-    Object.entries<number[]>(coordinates).map<[number, number[]]>(([key, xs]) => {
-      const y = Number.parseInt(key, 10);
-      const newXs = xs.map((x) => x + dx);
+export function translateBlock(coordinates: CoordinateCollection, dx: number, dy: number) {
+  return coordinates.allYs.reduce(
+    (collection, y) => {
+      const newXs = coordinates.byY[y].map((x) => x + dx);
 
-      return [y + dy, newXs];
-    })
+      return {
+        ...collection,
+        allYs: [...collection.allYs, y + dy],
+        byY: {
+          ...collection.byY,
+          [y + dy]: newXs,
+        },
+      };
+    },
+    { allYs: [], byY: {} } as CoordinateCollection
   );
 }
 
-function findCenterBlock(type: BlockType, coordinates: CoordinateMap, rotationDelta: 0 | 1 | 2 | 3): Coordinate {
+function findCenterBlock(type: BlockType, coordinates: CoordinateCollection, rotationDelta: 0 | 1 | 2 | 3): Coordinate {
   let centerBlock: Coordinate;
 
-  const allXs = Object.values(coordinates)
-    .flat()
-    .sort((a, b) => a - b);
+  const allXs = coordinates.allYs.flatMap((y) => coordinates.byY[y]).sort((a, b) => a - b);
 
-  const ys = Object.keys(coordinates).map((key) => Number.parseInt(key, 10));
+  const ys = coordinates.allYs;
   const isHorizontal = rotationDelta % 2 === 0;
 
   /* istanbul ignore else */
   if (['T', 'L', 'J'].includes(type)) {
     if (isHorizontal) {
       // Find index of central y-coordinate
-      const centerYIndex = ys.findIndex((y) => coordinates[y].length === 3);
+      const centerYIndex = ys.findIndex((y) => coordinates.byY[y].length === 3);
       const centerY = ys[centerYIndex];
 
       // Get central x-coordinate
-      const centerX = coordinates[centerY][1];
+      const centerX = coordinates.byY[centerY][1];
 
       centerBlock = [centerX, centerY];
     } else {
@@ -129,12 +138,12 @@ function findCenterBlock(type: BlockType, coordinates: CoordinateMap, rotationDe
       centerBlock = [sharedX, centerY];
     } else {
       // Get y-coordinate shared across xs
-      const sharedYIndex = ys.findIndex((y) => coordinates[y].length === 2);
+      const sharedYIndex = ys.findIndex((y) => coordinates.byY[y].length === 2);
       const sharedY = ys[sharedYIndex];
 
       // Get central x-coordinate based on rotation
       const centerXIndex = rotationDelta === 1 ? 0 : 1;
-      const centerX = coordinates[sharedY][centerXIndex];
+      const centerX = coordinates.byY[sharedY][centerXIndex];
 
       centerBlock = [centerX, sharedY];
     }
@@ -147,19 +156,17 @@ function findCenterBlock(type: BlockType, coordinates: CoordinateMap, rotationDe
 
 export function rotateBlock(
   type: BlockType,
-  coordinates: CoordinateMap,
+  coordinates: CoordinateCollection,
   rotationDelta: 0 | 1 | 2 | 3,
   direction: 'clockwise' | 'counterclockwise'
-): CoordinateMap {
+): CoordinateCollection {
   if (type === 'O') return coordinates;
 
-  let newCoordinates: CoordinateMap;
+  let newCoordinates: CoordinateCollection;
 
-  const allXs = Object.values(coordinates)
-    .flat()
-    .sort((a, b) => a - b);
+  const allXs = coordinates.allYs.flatMap((y) => coordinates.byY[y]).sort((a, b) => a - b);
 
-  const ys = Object.keys(coordinates).map((key) => Number.parseInt(key, 10));
+  const ys = coordinates.allYs.sort((a, b) => a - b);
 
   if (type === 'I') {
     if (rotationDelta % 2 === 0) {
@@ -167,7 +174,7 @@ export function rotateBlock(
       const y = ys[0];
 
       // Get a sorted copy of the x coordinates
-      const xs = [...coordinates[y]].sort((a, b) => a - b);
+      const xs = [...coordinates.byY[y]].sort((a, b) => a - b);
 
       // Use rotation to select final x and the fourth y coordinate
       let selectionIndex: number;
@@ -185,10 +192,13 @@ export function rotateBlock(
 
       // Update coordinates
       newCoordinates = {
-        [y + 1]: [x],
-        [y]: [x],
-        [y - 1]: [x],
-        [finalY]: [x],
+        byY: {
+          [y + 1]: [x],
+          [y]: [x],
+          [y - 1]: [x],
+          [finalY]: [x],
+        },
+        allYs: [y + 1, y, y - 1, finalY].sort((a, b) => a - b),
       };
     } else {
       // Find the x coordinate present 4 times
@@ -208,18 +218,21 @@ export function rotateBlock(
       }
       const y = ys[selectionIndex];
       const finalX = rotationDelta === 1 ? sharedX - 2 : sharedX + 2;
-      const finalXs = [sharedX - 1, sharedX, sharedX + 1, finalX].sort();
+      const finalXs = [sharedX - 1, sharedX, sharedX + 1, finalX].sort((a, b) => a - b);
 
       // Update coordinates
       newCoordinates = {
-        [y]: finalXs,
+        byY: {
+          [y]: finalXs,
+        },
+        allYs: [y],
       };
     }
   } else {
     const centerBlock = findCenterBlock(type, coordinates, rotationDelta);
 
     // Convert coordinate map into array of coordinates
-    const coordinateArray = ys.flatMap((y) => coordinates[y].map<Coordinate>((x) => [x, y]));
+    const coordinateArray = ys.flatMap((y) => coordinates.byY[y].map<Coordinate>((x) => [x, y]));
 
     // Rotate each coordinate relative to the central block
     const rotatedCoordinateArray = coordinateArray
@@ -228,12 +241,28 @@ export function rotateBlock(
       .map<Coordinate>(([x, y]) => [x + centerBlock[0], y + centerBlock[1]]);
 
     // Convert the rotated coordinates back into a map structure
-    newCoordinates = rotatedCoordinateArray.reduce((coordinateMap, [x, y]) => {
-      return {
-        ...coordinateMap,
-        [y]: [...(coordinateMap[y] ?? []), x].sort((a, b) => a - b),
-      };
-    }, {} as CoordinateMap);
+    newCoordinates = rotatedCoordinateArray.reduce(
+      (collection, [x, y]) => {
+        if (collection.allYs.includes(y)) {
+          return {
+            ...collection,
+            byY: {
+              ...collection.byY,
+              [y]: [...collection.byY[y], x].sort((a, b) => a - b),
+            },
+          };
+        }
+        return {
+          ...collection,
+          allYs: [...collection.allYs, y].sort((a, b) => a - b),
+          byY: {
+            ...collection.byY,
+            [y]: [x],
+          },
+        };
+      },
+      { allYs: [], byY: {} } as CoordinateCollection
+    );
   }
 
   return newCoordinates;
