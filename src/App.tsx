@@ -1,14 +1,42 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Canvas from './features/drawing/Canvas';
 
 function App() {
+  const height = window.innerHeight - 50;
+  const width = height / 2 + 400;
+  const sideLength = height / 20;
+
+  const [x] = useState(5);
+  const [y, setY] = useState(21);
+
   return (
     <Canvas
+      height={height}
+      width={width}
       draw={(ctx, frame) => {
         ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-        ctx.beginPath();
-        ctx.arc(50, 100, 20 * Math.sin(frame * 0.05) ** 2, 0, 2 * Math.PI);
-        ctx.fill();
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+
+        ctx.fillRect(200, 0, ctx.canvas.height / 2, ctx.canvas.height);
+
+        const realX = 200 + x * sideLength;
+        const realY = (20 - y) * sideLength;
+
+        if (frame % 60 === 19) {
+          setY((prevY) => prevY - 1);
+        }
+
+        ctx.fillStyle = 'blue';
+        ctx.strokeStyle = 'gray';
+        ctx.lineWidth = 1;
+        ctx.fillRect(realX, realY, sideLength, sideLength);
+        ctx.strokeRect(realX, realY, sideLength, sideLength);
+
+        ctx.font = '20px sans-serif';
+        ctx.fillStyle = 'white';
+        ctx.fillText('Hold', 10, 50);
+        ctx.fillText('Next', ctx.canvas.height + 90, 50);
+        ctx.fillText('Lines: 0', 10, 350);
       }}
     />
   );
