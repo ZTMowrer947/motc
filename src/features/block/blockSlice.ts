@@ -8,7 +8,7 @@ import {
   rotateBlock,
   translateBlock,
 } from './blockAPI';
-import type { RootState } from '../../app/store';
+import type { RootState, AppThunk } from '../../app/store';
 
 // Types
 export interface ActiveBlockData {
@@ -160,6 +160,26 @@ export const selectOccupiedCoordinates = createSelector(
     return allYs.flatMap((y) => byY[y].map<Coordinate>((x) => [x, y]));
   }
 );
+
+// Thunks
+export function translateActiveBlockIfPossible({ dx, dy }: TranslateBlockPayload): AppThunk {
+  return (dispatch, getState) => {
+    const state = getState();
+    const coordinates = selectActiveBlockCoordinates(state);
+
+    const canTranslate =
+      coordinates.length > 0 &&
+      coordinates.every(([x, y]) => {
+        const [newX, newY] = [x + dx, y + dy];
+
+        return newX >= 0 && newY > 0 && newX < 10;
+      });
+
+    if (canTranslate) {
+      dispatch(translateActiveBlock({ dx, dy }));
+    }
+  };
+}
 
 // Reducer
 export type BlockState = Readonly<ReturnType<typeof blockSlice.reducer>>;

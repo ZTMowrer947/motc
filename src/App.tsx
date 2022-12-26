@@ -6,7 +6,7 @@ import {
   fillBag,
   selectActiveBlockCoordinates,
   selectOccupiedCoordinates,
-  translateActiveBlock,
+  translateActiveBlockIfPossible,
 } from './features/block/blockSlice';
 
 function App() {
@@ -41,8 +41,8 @@ function App() {
         ctx.strokeStyle = 'gray';
         ctx.lineWidth = 1;
 
-        if (coordinates.length > 0 && frame % 60 === 19) {
-          dispatch(translateActiveBlock({ dx: 0, dy: -1 }));
+        if (frame % 20 === 19) {
+          dispatch(translateActiveBlockIfPossible({ dx: 0, dy: -1 }));
         }
 
         coordinates.forEach(([x, y]) => {
