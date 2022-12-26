@@ -119,9 +119,9 @@ const blockSlice = createSlice({
 
         coordinates.allYs.forEach((y) => {
           if (state.occupied.allYs.includes(y)) {
-            const newXs = coordinates.byY[y].filter((x) => !state.occupied.byY[y].includes(x));
+            const allXs = [...coordinates.byY[y], ...state.occupied.byY[y]];
 
-            state.occupied.byY[y] = [...state.occupied.byY[y], ...newXs];
+            state.occupied.byY[y] = Array.from(new Set(allXs));
           } else {
             state.occupied.allYs.push(y);
             state.occupied.byY[y] = coordinates.byY[y];
@@ -147,6 +147,16 @@ export const selectActiveBlockCoordinates = createSelector(
   (byY, allYs) => {
     if (!byY || !allYs) return [];
 
+    return allYs.flatMap((y) => byY[y].map<Coordinate>((x) => [x, y]));
+  }
+);
+
+export const selectOccupiedXCoordinatesByY = (state: RootState) => state.block.occupied.byY;
+export const selectOccupiedYCoordinates = (state: RootState) => state.block.occupied.allYs;
+
+export const selectOccupiedCoordinates = createSelector(
+  [selectOccupiedXCoordinatesByY, selectOccupiedYCoordinates],
+  (byY, allYs) => {
     return allYs.flatMap((y) => byY[y].map<Coordinate>((x) => [x, y]));
   }
 );

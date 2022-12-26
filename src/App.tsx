@@ -5,13 +5,14 @@ import {
   fillActiveBlock,
   fillBag,
   selectActiveBlockCoordinates,
+  selectOccupiedCoordinates,
   translateActiveBlock,
 } from './features/block/blockSlice';
 
 function App() {
-  const activeBlock = useAppSelector((state) => state.block.active);
   const coordinates = useAppSelector(selectActiveBlockCoordinates);
   const nextBlocks = useAppSelector((state) => state.block.nextBlocks);
+  const occupiedCoordinates = useAppSelector(selectOccupiedCoordinates);
   const dispatch = useAppDispatch();
 
   const height = window.innerHeight - 50;
@@ -21,7 +22,7 @@ function App() {
   useEffect(() => {
     if (nextBlocks.length === 0) {
       dispatch(fillBag(['I']));
-    } else if (!activeBlock) {
+    } else if (coordinates.length === 0) {
       dispatch(fillActiveBlock());
     }
   });
@@ -36,23 +37,30 @@ function App() {
 
         ctx.fillRect(200, 0, ctx.canvas.height / 2, ctx.canvas.height);
 
-        if (activeBlock) {
-          ctx.fillStyle = 'blue';
-          ctx.strokeStyle = 'gray';
-          ctx.lineWidth = 1;
+        ctx.fillStyle = 'blue';
+        ctx.strokeStyle = 'gray';
+        ctx.lineWidth = 1;
 
-          if (frame % 60 === 19) {
-            dispatch(translateActiveBlock({ dx: 0, dy: -1 }));
-          }
-
-          coordinates.forEach(([x, y]) => {
-            const realX = 200 + x * sideLength;
-            const realY = (20 - y) * sideLength;
-
-            ctx.fillRect(realX, realY, sideLength, sideLength);
-            ctx.strokeRect(realX, realY, sideLength, sideLength);
-          });
+        if (coordinates.length > 0 && frame % 60 === 19) {
+          dispatch(translateActiveBlock({ dx: 0, dy: -1 }));
         }
+
+        coordinates.forEach(([x, y]) => {
+          const realX = 200 + x * sideLength;
+          const realY = (20 - y) * sideLength;
+
+          ctx.fillRect(realX, realY, sideLength, sideLength);
+          ctx.strokeRect(realX, realY, sideLength, sideLength);
+        });
+
+        ctx.fillStyle = 'gray';
+        occupiedCoordinates.forEach(([x, y]) => {
+          const realX = 200 + x * sideLength;
+          const realY = (20 - y) * sideLength;
+
+          ctx.fillRect(realX, realY, sideLength, sideLength);
+          ctx.strokeRect(realX, realY, sideLength, sideLength);
+        });
 
         ctx.font = '20px sans-serif';
         ctx.fillStyle = 'white';
