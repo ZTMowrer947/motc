@@ -9,10 +9,14 @@ import {
   selectOccupiedCoordinates,
   translateActiveBlockIfPossible,
 } from './features/block/blockSlice';
-import { drawSquare } from './features/block/blockAPI';
+import { BlockType, drawSquare, getBlockColor } from './features/block/blockAPI';
 import useKeyListener from './app/hooks/useKeyListener';
+import { shuffle } from './features/rng/randomAPI';
+
+const possibleBlockTypes: BlockType[] = ['I', 'O', 'T', 'L', 'J', 'S', 'Z'];
 
 function App() {
+  const blockType = useAppSelector((state) => state.block.active?.type);
   const coordinates = useAppSelector(selectActiveBlockCoordinates);
   const nextBlocks = useAppSelector((state) => state.block.nextBlocks);
   const occupiedCoordinates = useAppSelector(selectOccupiedCoordinates);
@@ -24,7 +28,7 @@ function App() {
 
   useEffect(() => {
     if (nextBlocks.length === 0) {
-      dispatch(fillBag(['I']));
+      dispatch(fillBag(shuffle(possibleBlockTypes)));
     } else if (coordinates.length === 0) {
       dispatch(fillActiveBlock());
     }
@@ -53,7 +57,8 @@ function App() {
         }
 
         coordinates.forEach(([x, y]) => {
-          drawSquare(ctx, 'blue', x, y, sideLength);
+          const color = blockType ? getBlockColor(blockType) : 'gray';
+          drawSquare(ctx, color, x, y, sideLength);
         });
 
         ctx.fillStyle = 'gray';

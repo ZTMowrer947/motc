@@ -279,3 +279,51 @@ export function drawSquare(ctx: CanvasRenderingContext2D, color: string, x: numb
   ctx.fillRect(realX, realY, sideLength, sideLength);
   ctx.strokeRect(realX, realY, sideLength, sideLength);
 }
+
+export function getBlockColor(type: BlockType) {
+  let colors: [number, number, number];
+
+  switch (type) {
+    case 'I': {
+      colors = [0, 255, 255]; // Cyan
+      break;
+    }
+
+    case 'O': {
+      colors = [255, 255, 0]; // Yellow
+      break;
+    }
+
+    case 'T': {
+      colors = [160, 0, 160]; // Purple
+      break;
+    }
+
+    case 'L': {
+      colors = [255, 165, 0]; // Orange
+      break;
+    }
+
+    case 'J': {
+      colors = [0, 0, 255]; // Blue
+      break;
+    }
+
+    case 'S': {
+      colors = [0, 255, 0]; // Green
+      break;
+    }
+
+    case 'Z': {
+      colors = [255, 0, 0]; // Red
+      break;
+    }
+
+    default: {
+      colors = [68, 68, 68]; // Gray
+      break;
+    }
+  }
+
+  return `rgb(${colors.join(', ')}`;
+}
