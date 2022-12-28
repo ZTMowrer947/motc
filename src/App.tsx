@@ -4,6 +4,7 @@ import { useAppDispatch, useAppSelector } from './app/hooks';
 import {
   fillActiveBlock,
   fillBag,
+  moveDownOrLockActiveBlock,
   selectActiveBlockCoordinates,
   selectOccupiedCoordinates,
   translateActiveBlockIfPossible,
@@ -48,7 +49,7 @@ function App() {
         ctx.fillRect(200, 0, ctx.canvas.height / 2, ctx.canvas.height);
 
         if (frame % 20 === 19) {
-          dispatch(translateActiveBlockIfPossible({ dx: 0, dy: -1 }));
+          dispatch(moveDownOrLockActiveBlock());
         }
 
         coordinates.forEach(([x, y]) => {

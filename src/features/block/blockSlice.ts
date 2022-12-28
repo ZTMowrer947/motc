@@ -162,7 +162,7 @@ export const selectOccupiedCoordinates = createSelector(
 );
 
 // Thunks
-export function translateActiveBlockIfPossible({ dx, dy }: TranslateBlockPayload): AppThunk {
+export function translateActiveBlockIfPossible({ dx, dy }: TranslateBlockPayload): AppThunk<boolean> {
   return (dispatch, getState) => {
     const state = getState();
     const coordinates = selectActiveBlockCoordinates(state);
@@ -172,11 +172,27 @@ export function translateActiveBlockIfPossible({ dx, dy }: TranslateBlockPayload
       coordinates.every(([x, y]) => {
         const [newX, newY] = [x + dx, y + dy];
 
-        return newX >= 0 && newY > 0 && newX < 10;
+        const isInBounds = newX >= 0 && newY > 0 && newX < 10;
+
+        const isInOccupied = state.block.occupied.allYs.includes(newY) && state.block.occupied.byY[newY].includes(newX);
+
+        return isInBounds && !isInOccupied;
       });
 
     if (canTranslate) {
       dispatch(translateActiveBlock({ dx, dy }));
+    }
+
+    return canTranslate;
+  };
+}
+
+export function moveDownOrLockActiveBlock(): AppThunk {
+  return (dispatch) => {
+    const didTranslate = dispatch(translateActiveBlockIfPossible({ dx: 0, dy: -1 }));
+
+    if (!didTranslate) {
+      dispatch(lockActiveBlock());
     }
   };
 }
