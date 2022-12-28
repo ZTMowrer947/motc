@@ -9,6 +9,7 @@ import {
   translateActiveBlockIfPossible,
 } from './features/block/blockSlice';
 import { drawSquare } from './features/block/blockAPI';
+import useKeyListener from './app/hooks/useKeyListener';
 
 function App() {
   const coordinates = useAppSelector(selectActiveBlockCoordinates);
@@ -26,6 +27,14 @@ function App() {
     } else if (coordinates.length === 0) {
       dispatch(fillActiveBlock());
     }
+  });
+
+  useKeyListener('ArrowRight', () => {
+    dispatch(translateActiveBlockIfPossible({ dx: 1, dy: 0 }));
+  });
+
+  useKeyListener('ArrowLeft', () => {
+    dispatch(translateActiveBlockIfPossible({ dx: -1, dy: 0 }));
   });
 
   return (

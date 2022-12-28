@@ -8,15 +8,15 @@ interface PropTypes {
 
 function Canvas({ draw, width, height }: PropTypes) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const frameRef = useRef(0);
 
   useEffect(() => {
     const ctx = canvasRef.current?.getContext('2d');
-    let frame = 0;
     let frameId: number;
     if (ctx) {
       const render = () => {
-        frame += 1;
-        draw(ctx, frame);
+        frameRef.current += 1;
+        draw(ctx, frameRef.current);
         frameId = window.requestAnimationFrame(render);
       };
 
