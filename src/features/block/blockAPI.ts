@@ -267,3 +267,15 @@ export function rotateBlock(
 
   return newCoordinates;
 }
+
+export function drawSquare(ctx: CanvasRenderingContext2D, color: string, x: number, y: number, sideLength: number) {
+  ctx.fillStyle = color;
+  ctx.strokeStyle = 'gray';
+  ctx.lineWidth = 1;
+
+  const realX = 200 + x * sideLength;
+  const realY = (20 - y) * sideLength;
+
+  ctx.fillRect(realX, realY, sideLength, sideLength);
+  ctx.strokeRect(realX, realY, sideLength, sideLength);
+}

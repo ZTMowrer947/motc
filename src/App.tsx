@@ -8,6 +8,7 @@ import {
   selectOccupiedCoordinates,
   translateActiveBlockIfPossible,
 } from './features/block/blockSlice';
+import { drawSquare } from './features/block/blockAPI';
 
 function App() {
   const coordinates = useAppSelector(selectActiveBlockCoordinates);
@@ -37,29 +38,17 @@ function App() {
 
         ctx.fillRect(200, 0, ctx.canvas.height / 2, ctx.canvas.height);
 
-        ctx.fillStyle = 'blue';
-        ctx.strokeStyle = 'gray';
-        ctx.lineWidth = 1;
-
         if (frame % 20 === 19) {
           dispatch(translateActiveBlockIfPossible({ dx: 0, dy: -1 }));
         }
 
         coordinates.forEach(([x, y]) => {
-          const realX = 200 + x * sideLength;
-          const realY = (20 - y) * sideLength;
-
-          ctx.fillRect(realX, realY, sideLength, sideLength);
-          ctx.strokeRect(realX, realY, sideLength, sideLength);
+          drawSquare(ctx, 'blue', x, y, sideLength);
         });
 
         ctx.fillStyle = 'gray';
         occupiedCoordinates.forEach(([x, y]) => {
-          const realX = 200 + x * sideLength;
-          const realY = (20 - y) * sideLength;
-
-          ctx.fillRect(realX, realY, sideLength, sideLength);
-          ctx.strokeRect(realX, realY, sideLength, sideLength);
+          drawSquare(ctx, 'gray', x, y, sideLength);
         });
 
         ctx.font = '20px sans-serif';
