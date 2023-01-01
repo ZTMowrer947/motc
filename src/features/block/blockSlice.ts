@@ -143,8 +143,9 @@ const blockSlice = createSlice({
 
       aboveYs.forEach((aboveY) => {
         state.occupied.byY[aboveY - 1] = state.occupied.byY[aboveY];
-        const yIndex = state.occupied.allYs.findIndex((y2) => y2 === aboveY);
+        delete state.occupied.byY[aboveY];
 
+        const yIndex = state.occupied.allYs.findIndex((y2) => y2 === aboveY);
         state.occupied.allYs.splice(yIndex, 1, aboveY - 1);
       });
 
@@ -212,6 +213,24 @@ export function moveDownOrLockActiveBlock(): AppThunk {
     if (!didTranslate) {
       dispatch(lockActiveBlock());
     }
+  };
+}
+
+export function clearFilledLines(): AppThunk<number> {
+  return (dispatch, getState) => {
+    let filledYs: number[] = [];
+
+    do {
+      const state = getState();
+      const occupiedYs = selectOccupiedYCoordinates(state);
+      const occupiedByY = selectOccupiedXCoordinatesByY(state);
+
+      filledYs = occupiedYs.filter((y) => occupiedByY[y].length === 10);
+
+      if (filledYs.length > 0) dispatch(clearLine({ y: filledYs[0] }));
+    } while (filledYs.length > 0);
+
+    return filledYs.length;
   };
 }
 

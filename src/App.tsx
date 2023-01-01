@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import Canvas from './features/drawing/Canvas';
 import { useAppDispatch, useAppSelector } from './app/hooks';
 import {
-  clearLine,
+  clearFilledLines,
   fillActiveBlock,
   fillBag,
   moveDownOrLockActiveBlock,
@@ -18,10 +18,10 @@ const possibleBlockTypes: BlockType[] = ['I', 'O', 'T', 'L', 'J', 'S', 'Z'];
 
 function App() {
   const blockType = useAppSelector((state) => state.block.active?.type);
-  const occupiedCollection = useAppSelector((state) => state.block.occupied);
   const coordinates = useAppSelector(selectActiveBlockCoordinates);
   const nextBlocks = useAppSelector((state) => state.block.nextBlocks);
   const occupiedCoordinates = useAppSelector(selectOccupiedCoordinates);
+  const lineClears = useAppSelector((state) => state.block.lineClears);
   const dispatch = useAppDispatch();
 
   const height = window.innerHeight - 50;
@@ -34,11 +34,7 @@ function App() {
     } else if (coordinates.length === 0) {
       dispatch(fillActiveBlock());
     } else {
-      const filledYs = occupiedCollection.allYs.filter((y) => occupiedCollection.byY[y].length === 10);
-
-      filledYs.forEach((y) => {
-        dispatch(clearLine({ y }));
-      });
+      dispatch(clearFilledLines());
     }
   });
 
@@ -78,7 +74,7 @@ function App() {
         ctx.fillStyle = 'white';
         ctx.fillText('Hold', 10, 50);
         ctx.fillText('Next', ctx.canvas.height + 90, 50);
-        ctx.fillText('Lines: 0', 10, 350);
+        ctx.fillText(`Lines: ${lineClears}`, 10, 350);
       }}
     />
   );
