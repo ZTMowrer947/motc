@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import Canvas from './features/drawing/Canvas';
 import { useAppDispatch, useAppSelector } from './app/hooks';
 import {
+  clearLine,
   fillActiveBlock,
   fillBag,
   moveDownOrLockActiveBlock,
@@ -17,6 +18,7 @@ const possibleBlockTypes: BlockType[] = ['I', 'O', 'T', 'L', 'J', 'S', 'Z'];
 
 function App() {
   const blockType = useAppSelector((state) => state.block.active?.type);
+  const occupiedCollection = useAppSelector((state) => state.block.occupied);
   const coordinates = useAppSelector(selectActiveBlockCoordinates);
   const nextBlocks = useAppSelector((state) => state.block.nextBlocks);
   const occupiedCoordinates = useAppSelector(selectOccupiedCoordinates);
@@ -31,6 +33,12 @@ function App() {
       dispatch(fillBag(shuffle(possibleBlockTypes)));
     } else if (coordinates.length === 0) {
       dispatch(fillActiveBlock());
+    } else {
+      const filledYs = occupiedCollection.allYs.filter((y) => occupiedCollection.byY[y].length === 10);
+
+      filledYs.forEach((y) => {
+        dispatch(clearLine({ y }));
+      });
     }
   });
 

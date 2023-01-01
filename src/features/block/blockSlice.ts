@@ -27,6 +27,10 @@ interface RotateBlockPayload {
   direction: 'clockwise' | 'counterclockwise';
 }
 
+interface ClearLinePayload {
+  y: number;
+}
+
 // Slice
 const blockSlice = createSlice({
   name: 'block',
@@ -132,11 +136,25 @@ const blockSlice = createSlice({
         state.active = null;
       }
     },
+    clearLine(state, { payload }: PayloadAction<ClearLinePayload>) {
+      const { y } = payload;
+
+      const aboveYs = state.occupied.allYs.filter((y2) => y < y2);
+
+      aboveYs.forEach((aboveY) => {
+        state.occupied.byY[aboveY - 1] = state.occupied.byY[aboveY];
+        const yIndex = state.occupied.allYs.findIndex((y2) => y2 === aboveY);
+
+        state.occupied.allYs.splice(yIndex, 1, aboveY - 1);
+      });
+
+      state.lineClears += 1;
+    },
   },
 });
 
 // Actions
-export const { fillActiveBlock, translateActiveBlock, rotateActiveBlock, fillBag, lockActiveBlock } =
+export const { fillActiveBlock, translateActiveBlock, rotateActiveBlock, fillBag, lockActiveBlock, clearLine } =
   blockSlice.actions;
 
 // Selectors
