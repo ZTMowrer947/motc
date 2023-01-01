@@ -268,6 +268,15 @@ export function rotateBlock(
   return newCoordinates;
 }
 
+export function areBlockCoordinatesValid(
+  currentCoordinates: CoordinateCollection,
+  occupiedCoordinates: CoordinateCollection
+) {
+  return currentCoordinates.allYs.every(
+    (y) => y > 0 && currentCoordinates.byY[y].every((x) => x >= 0 && x < 10 && !occupiedCoordinates.byY[y]?.includes(x))
+  );
+}
+
 export function drawSquare(ctx: CanvasRenderingContext2D, color: string, x: number, y: number, sideLength: number) {
   ctx.fillStyle = color;
   ctx.strokeStyle = 'gray';

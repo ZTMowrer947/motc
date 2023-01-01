@@ -1,5 +1,6 @@
 import { createSelector, createSlice, PayloadAction } from '@reduxjs/toolkit';
 import {
+  areBlockCoordinatesValid,
   BlockType,
   Coordinate,
   CoordinateCollection,
@@ -164,25 +165,24 @@ export const selectOccupiedCoordinates = createSelector(
 // Thunks
 export function translateActiveBlockIfPossible({ dx, dy }: TranslateBlockPayload): AppThunk<boolean> {
   return (dispatch, getState) => {
+    // Get coordinates of active block
     const state = getState();
-    const coordinates = selectActiveBlockCoordinates(state);
+    const coordinates = state.block.active?.coordinates;
 
-    const canTranslate =
-      coordinates.length > 0 &&
-      coordinates.every(([x, y]) => {
-        const [newX, newY] = [x + dx, y + dy];
+    // If no active block is set, we can't do anything, so we don't
+    if (!coordinates) return false;
 
-        const isInBounds = newX >= 0 && newY > 0 && newX < 10;
+    // Calculate what the translated coordinates would be
+    const nextCoordinates = translateBlock(coordinates, dx, dy);
 
-        const isInOccupied = state.block.occupied.allYs.includes(newY) && state.block.occupied.byY[newY].includes(newX);
-
-        return isInBounds && !isInOccupied;
-      });
+    // Determine whether these coordinates are valid and apply the translation if we can
+    const canTranslate = areBlockCoordinatesValid(nextCoordinates, state.block.occupied);
 
     if (canTranslate) {
       dispatch(translateActiveBlock({ dx, dy }));
     }
 
+    // Return whether we could translate the block in any case
     return canTranslate;
   };
 }
