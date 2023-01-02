@@ -6,6 +6,7 @@ import {
   fillActiveBlock,
   fillBag,
   moveDownOrLockActiveBlock,
+  rotateActiveBlockIfPossible,
   selectActiveBlockCoordinates,
   selectOccupiedCoordinates,
   translateActiveBlockIfPossible,
@@ -44,6 +45,14 @@ function App() {
 
   useKeyListener('ArrowLeft', () => {
     dispatch(translateActiveBlockIfPossible({ dx: -1, dy: 0 }));
+  });
+
+  useKeyListener('z', () => {
+    dispatch(rotateActiveBlockIfPossible({ direction: 'counterclockwise' }));
+  });
+
+  useKeyListener('x', () => {
+    dispatch(rotateActiveBlockIfPossible({ direction: 'clockwise' }));
   });
 
   return (

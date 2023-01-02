@@ -166,7 +166,7 @@ export function rotateBlock(
 
   const allXs = coordinates.allYs.flatMap((y) => coordinates.byY[y]).sort((a, b) => a - b);
 
-  const ys = coordinates.allYs.sort((a, b) => a - b);
+  const ys = [...coordinates.allYs].sort((a, b) => a - b);
 
   if (type === 'I') {
     if (rotationDelta % 2 === 0) {

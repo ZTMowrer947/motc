@@ -206,6 +206,35 @@ export function translateActiveBlockIfPossible({ dx, dy }: TranslateBlockPayload
   };
 }
 
+export function rotateActiveBlockIfPossible({ direction }: RotateBlockPayload): AppThunk<boolean> {
+  return (dispatch, getState) => {
+    // Get active block
+    const state = getState();
+    const { active: activeBlock } = state.block;
+
+    // If no active block is set, we can't do anything, so we don't
+    if (!activeBlock) return false;
+
+    // Calculate what the rotated coordinates would be
+    const nextCoordinates = rotateBlock(
+      activeBlock.type,
+      activeBlock.coordinates,
+      activeBlock.rotationDelta,
+      direction
+    );
+
+    // Determine whether these coordinates are valid and apply the rotation if we can
+    const canRotate = areBlockCoordinatesValid(nextCoordinates, state.block.occupied);
+
+    if (canRotate) {
+      dispatch(rotateActiveBlock({ direction }));
+    }
+
+    // Return whether we could translate the block in any case
+    return canRotate;
+  };
+}
+
 export function moveDownOrLockActiveBlock(): AppThunk {
   return (dispatch) => {
     const didTranslate = dispatch(translateActiveBlockIfPossible({ dx: 0, dy: -1 }));
