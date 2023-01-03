@@ -1,5 +1,6 @@
 import blockReducer, {
   BlockState,
+  clearLine,
   fillActiveBlock,
   fillBag,
   lockActiveBlock,
@@ -549,6 +550,84 @@ describe('block reducer', () => {
 
     // Act
     const action = lockActiveBlock();
+
+    const finalState = blockReducer(initialState, action);
+
+    // Assert
+    expect(finalState).toEqual(expectedState);
+  });
+
+  it('should properly handle clearLine on bottom row', () => {
+    // Arrange
+    const initialState: BlockState = {
+      active: null,
+      occupied: {
+        byY: {
+          1: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+          2: [0, 1, 9],
+          3: [1],
+        },
+        allYs: [1, 2, 3],
+      },
+      nextBlocks: [],
+      lineClears: 0,
+    };
+
+    const expectedState: BlockState = {
+      active: null,
+      occupied: {
+        byY: {
+          1: [0, 1, 9],
+          2: [1],
+        },
+        allYs: [1, 2],
+      },
+      nextBlocks: [],
+      lineClears: 1,
+    };
+
+    // Act
+    const action = clearLine({ y: 1 });
+
+    const finalState = blockReducer(initialState, action);
+
+    // Assert
+    expect(finalState).toEqual(expectedState);
+  });
+
+  it('should properly handle clearLine on above-ground row', () => {
+    // Arrange
+    const initialState: BlockState = {
+      active: null,
+      occupied: {
+        byY: {
+          1: [1, 4, 5, 6, 7, 9],
+          2: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+          3: [0, 1, 9],
+          4: [1],
+        },
+        allYs: [1, 2, 3, 4],
+      },
+      nextBlocks: [],
+      lineClears: 0,
+    };
+
+    const expectedState: BlockState = {
+      active: null,
+      occupied: {
+        byY: {
+          1: [1, 4, 5, 6, 7, 9],
+          2: [0, 1, 9],
+          3: [1],
+        },
+        allYs: [1, 2, 3],
+      },
+      nextBlocks: [],
+      lineClears: 1,
+    };
+
+    // Act
+    const action = clearLine({ y: 2 });
 
     const finalState = blockReducer(initialState, action);
 

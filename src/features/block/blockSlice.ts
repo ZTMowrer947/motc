@@ -139,16 +139,23 @@ const blockSlice = createSlice({
     clearLine(state, { payload }: PayloadAction<ClearLinePayload>) {
       const { y } = payload;
 
-      const aboveYs = state.occupied.allYs.filter((y2) => y < y2);
+      // Find and remove row from array of y-indices
+      const yIndex = state.occupied.allYs.findIndex((y2) => y2 === y);
+      state.occupied.allYs.splice(yIndex, 1);
 
-      aboveYs.forEach((aboveY) => {
-        state.occupied.byY[aboveY - 1] = state.occupied.byY[aboveY];
-        delete state.occupied.byY[aboveY];
+      // Loop through remaining y's
+      state.occupied.allYs.forEach((y2, index, ys) => {
+        if (y2 > y) {
+          // Move array of occupied x's down by one
+          state.occupied.byY[y2 - 1] = state.occupied.byY[y2];
+          delete state.occupied.byY[y2];
 
-        const yIndex = state.occupied.allYs.findIndex((y2) => y2 === aboveY);
-        state.occupied.allYs.splice(yIndex, 1, aboveY - 1);
+          // Decrement each y by one
+          ys.splice(index, 1, y2 - 1);
+        }
       });
 
+      // Increment line clear counter
       state.lineClears += 1;
     },
   },
