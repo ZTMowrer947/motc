@@ -47,6 +47,10 @@ function App() {
     dispatch(translateActiveBlockIfPossible({ dx: -1, dy: 0 }));
   });
 
+  useKeyListener('ArrowDown', () => {
+    dispatch(translateActiveBlockIfPossible({ dx: 0, dy: -1 }));
+  });
+
   useKeyListener('z', () => {
     dispatch(rotateActiveBlockIfPossible({ direction: 'counterclockwise' }));
   });
