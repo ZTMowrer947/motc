@@ -261,6 +261,35 @@ export function moveDownOrLockActiveBlock(): AppThunk {
   };
 }
 
+export function hardDropActiveBlock(): AppThunk {
+  return (dispatch, getState) => {
+    // Get occupied and active block coordinate data
+    const state = getState();
+    const { active: activeBlock, occupied } = state.block;
+
+    // Ensure we actually have a block to drop
+    if (activeBlock) {
+      let dy = -1;
+
+      let translatedCoordinates = activeBlock.coordinates;
+
+      // Find maximum amount down we can validly drop the block
+      do {
+        dy -= 1;
+        translatedCoordinates = translateBlock(activeBlock.coordinates, 0, dy);
+      } while (areBlockCoordinatesValid(translatedCoordinates, occupied));
+
+      dy += 1;
+
+      // Drop the block down by that much
+      dispatch(translateActiveBlock({ dx: 0, dy }));
+
+      // Lock the piece instantly
+      dispatch(lockActiveBlock());
+    }
+  };
+}
+
 export function clearFilledLines(): AppThunk<number> {
   return (dispatch, getState) => {
     let filledYs: number[] = [];

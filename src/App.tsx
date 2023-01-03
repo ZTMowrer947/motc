@@ -5,6 +5,7 @@ import {
   clearFilledLines,
   fillActiveBlock,
   fillBag,
+  hardDropActiveBlock,
   moveDownOrLockActiveBlock,
   rotateActiveBlockIfPossible,
   selectActiveBlockCoordinates,
@@ -57,6 +58,10 @@ function App() {
 
   useKeyListener('x', () => {
     dispatch(rotateActiveBlockIfPossible({ direction: 'clockwise' }));
+  });
+
+  useKeyListener(' ', () => {
+    dispatch(hardDropActiveBlock());
   });
 
   return (
