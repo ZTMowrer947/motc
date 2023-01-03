@@ -50,8 +50,10 @@ const blockSlice = createSlice({
 
       // Ensure such a block was actually available before continuing
       if (nextBlock) {
+        // Get starting coordinates of selected block type
         const coordinateArray = getInitialCoordinatesForBlock(nextBlock);
 
+        // Convert into map structure
         const coordinates = coordinateArray.reduce(
           (currentCoordinates, [x, y]) => {
             if (currentCoordinates.allYs.includes(y)) {
@@ -75,6 +77,7 @@ const blockSlice = createSlice({
           { allYs: [], byY: {} } as CoordinateCollection
         );
 
+        // Set active block data in state
         state.active = {
           type: nextBlock,
           coordinates,
@@ -93,6 +96,8 @@ const blockSlice = createSlice({
     rotateActiveBlock(state, { payload }: PayloadAction<RotateBlockPayload>) {
       if (state.active) {
         const { type, coordinates, rotationDelta } = state.active;
+
+        // Do the actual gruntwork in rotating the block
         state.active.coordinates = rotateBlock(type, coordinates, rotationDelta, payload.direction);
 
         // Update the rotation delta
@@ -122,6 +127,7 @@ const blockSlice = createSlice({
       if (state.active) {
         const { coordinates } = state.active;
 
+        // Merge coordinates of active blocks into occupied block data
         coordinates.allYs.forEach((y) => {
           if (state.occupied.allYs.includes(y)) {
             const allXs = [...coordinates.byY[y], ...state.occupied.byY[y]];
@@ -133,6 +139,7 @@ const blockSlice = createSlice({
           }
         });
 
+        // Unset active block to make way for the next
         state.active = null;
       }
     },
@@ -244,8 +251,10 @@ export function rotateActiveBlockIfPossible({ direction }: RotateBlockPayload): 
 
 export function moveDownOrLockActiveBlock(): AppThunk {
   return (dispatch) => {
+    // Try to move block down and check if we actually did
     const didTranslate = dispatch(translateActiveBlockIfPossible({ dx: 0, dy: -1 }));
 
+    // If we didn't, lock the block
     if (!didTranslate) {
       dispatch(lockActiveBlock());
     }
@@ -257,14 +266,17 @@ export function clearFilledLines(): AppThunk<number> {
     let filledYs: number[] = [];
 
     do {
+      // Get occupied coordinate data
       const state = getState();
       const occupiedYs = selectOccupiedYCoordinates(state);
       const occupiedByY = selectOccupiedXCoordinatesByY(state);
 
+      // Collect y's that are filled
       filledYs = occupiedYs.filter((y) => occupiedByY[y].length === 10);
 
+      // As long as at least one line is filled, clear a line
       if (filledYs.length > 0) dispatch(clearLine({ y: filledYs[0] }));
-    } while (filledYs.length > 0);
+    } while (filledYs.length > 0); // Keep going until every filled line is cleared
 
     return filledYs.length;
   };

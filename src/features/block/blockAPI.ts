@@ -6,6 +6,11 @@ export type CoordinateCollection = {
 };
 export type BlockType = 'I' | 'O' | 'T' | 'L' | 'J' | 'S' | 'Z';
 
+/**
+ * Finds and returns the coordinates for dropping a new block of the given type
+ * @param type The type of block
+ * @return The array of starting coordinates for the given type of block
+ */
 export function getInitialCoordinatesForBlock(type: BlockType): Coordinate[] {
   switch (type) {
     case 'I': {
@@ -78,7 +83,14 @@ export function getInitialCoordinatesForBlock(type: BlockType): Coordinate[] {
   }
 }
 
-export function translateBlock(coordinates: CoordinateCollection, dx: number, dy: number) {
+/**
+ * Translates the given block coordinates by the given x and y deltas
+ * @param coordinates The coordinates to translate
+ * @param dx The amount to translate in the x-direction
+ * @param dy The amount to translate in the y-direction
+ * @return The translated coordinates
+ */
+export function translateBlock(coordinates: CoordinateCollection, dx: number, dy: number): CoordinateCollection {
   return coordinates.allYs.reduce(
     (collection, y) => {
       const newXs = coordinates.byY[y].map((x) => x + dx);
@@ -96,6 +108,13 @@ export function translateBlock(coordinates: CoordinateCollection, dx: number, dy
   );
 }
 
+/**
+ * Attempts to find the center to rotate about of the given block. Applicable for all blocks except I- and O-blocks.
+ * @param type The type of block
+ * @param coordinates The coordinates of the block
+ * @param rotationDelta The current rotation state of the block
+ * @return The coordinates of the center of the given block
+ */
 function findCenterBlock(type: BlockType, coordinates: CoordinateCollection, rotationDelta: 0 | 1 | 2 | 3): Coordinate {
   let centerBlock: Coordinate;
 
@@ -154,18 +173,27 @@ function findCenterBlock(type: BlockType, coordinates: CoordinateCollection, rot
   return centerBlock;
 }
 
+/**
+ * Rotates the given block in the given direction
+ * @param type The type of block
+ * @param coordinates The coordinates of the block
+ * @param rotationDelta The current rotation state of the block
+ * @param direction The direction to rotate the block, either clockwise or counterclockwise
+ * @return The rotated coordinates of the block
+ */
 export function rotateBlock(
   type: BlockType,
   coordinates: CoordinateCollection,
   rotationDelta: 0 | 1 | 2 | 3,
   direction: 'clockwise' | 'counterclockwise'
 ): CoordinateCollection {
+  // An O-block never needs rotated
   if (type === 'O') return coordinates;
 
   let newCoordinates: CoordinateCollection;
 
+  // Collect all the x and y coordinates, and sort them
   const allXs = coordinates.allYs.flatMap((y) => coordinates.byY[y]).sort((a, b) => a - b);
-
   const ys = [...coordinates.allYs].sort((a, b) => a - b);
 
   if (type === 'I') {
@@ -268,23 +296,42 @@ export function rotateBlock(
   return newCoordinates;
 }
 
+/**
+ * Checks the validity of the given coordinates of the active block.
+ * A block's coordinates are valid if they are not outside the game box and are
+ * not colliding with any occupied area of the box.
+ * @param currentCoordinates The coordinates of the active block
+ * @param occupiedCoordinates The coordinates already occupied by previous blocks
+ * @returns Whether the active block coordinates are valid.
+ */
 export function areBlockCoordinatesValid(
   currentCoordinates: CoordinateCollection,
   occupiedCoordinates: CoordinateCollection
-) {
+): boolean {
   return currentCoordinates.allYs.every(
     (y) => y > 0 && currentCoordinates.byY[y].every((x) => x >= 0 && x < 10 && !occupiedCoordinates.byY[y]?.includes(x))
   );
 }
 
+/**
+ * Draws a square on the game box
+ * @param ctx The canvas context to use for drawing
+ * @param color The color of the square
+ * @param x The x-coordinate of the square
+ * @param y The y-coordinate of the square
+ * @param sideLength The side length of the square
+ */
 export function drawSquare(ctx: CanvasRenderingContext2D, color: string, x: number, y: number, sideLength: number) {
+  // Set colors and line width
   ctx.fillStyle = color;
   ctx.strokeStyle = 'gray';
   ctx.lineWidth = 1;
 
+  // Calculate actual coordinates for canvas
   const realX = 200 + x * sideLength;
   const realY = (20 - y) * sideLength;
 
+  // Draw square with outline
   ctx.fillRect(realX, realY, sideLength, sideLength);
   ctx.strokeRect(realX, realY, sideLength, sideLength);
 }
