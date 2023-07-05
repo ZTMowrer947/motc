@@ -190,9 +190,7 @@ export const selectOccupiedYCoordinates = (state: RootState) => state.block.occu
 
 export const selectOccupiedCoordinates = createSelector(
   [selectOccupiedXCoordinatesByY, selectOccupiedYCoordinates],
-  (byY, allYs) => {
-    return allYs.flatMap((y) => byY[y].map<Coordinate>((x) => [x, y]));
-  }
+  (byY, allYs) => allYs.flatMap((y) => byY[y].map<Coordinate>((x) => [x, y]))
 );
 
 // Thunks

@@ -3,13 +3,7 @@
     "browser": true,
     "es2021": true
   },
-  "extends": [
-    "eslint:recommended",
-    "plugin:@typescript-eslint/recommended",
-    "airbnb",
-    "airbnb/hooks",
-    "prettier"
-  ],
+  "extends": ["eslint:recommended", "plugin:@typescript-eslint/recommended", "airbnb", "airbnb/hooks", "prettier"],
   "overrides": [
     {
       "files": ["**/*Slice.[jt]s"],
@@ -23,10 +17,7 @@
     "ecmaVersion": "latest",
     "sourceType": "module"
   },
-  "plugins": [
-    "react",
-    "@typescript-eslint"
-  ],
+  "plugins": ["react", "@typescript-eslint"],
   "rules": {
     "no-unused-vars": "off",
     "@typescript-eslint/no-unused-vars": "error",
@@ -49,7 +40,13 @@
     "react/jsx-filename-extension": [
       "warn",
       {
-       "extensions": [".js", ".jsx", ".tsx"]
+        "extensions": [".js", ".jsx", ".tsx"]
+      }
+    ],
+    "import/no-extraneous-dependencies": [
+      "error",
+      {
+        "devDependencies": ["**/*.@(spec|test).[jt]s?(x)", "./src/setupTests.ts"]
       }
     ]
   },
