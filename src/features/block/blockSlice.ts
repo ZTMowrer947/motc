@@ -19,8 +19,8 @@ export interface ActiveBlockData {
 }
 
 interface TranslateBlockPayload {
-  dx: number;
-  dy: number;
+  dCol: number;
+  dRow: number;
 }
 
 interface RotateBlockPayload {
@@ -28,7 +28,7 @@ interface RotateBlockPayload {
 }
 
 interface ClearLinePayload {
-  y: number;
+  row: number;
 }
 
 // Slice
@@ -37,8 +37,8 @@ const blockSlice = createSlice({
   initialState: {
     active: null as ActiveBlockData | null,
     occupied: {
-      byY: {} as CoordinateMap,
-      allYs: [] as number[],
+      byRow: {} as CoordinateMap,
+      rows: [] as number[],
     },
     nextBlocks: [] as BlockType[],
     lineClears: 0,
@@ -55,26 +55,26 @@ const blockSlice = createSlice({
 
         // Convert into map structure
         const coordinates = coordinateArray.reduce(
-          (currentCoordinates, [x, y]) => {
-            if (currentCoordinates.allYs.includes(y)) {
+          (currentCoordinates, [col, row]) => {
+            if (currentCoordinates.rows.includes(row)) {
               return {
                 ...currentCoordinates,
-                byY: {
-                  ...currentCoordinates.byY,
-                  [y]: [...currentCoordinates.byY[y], x],
+                byRow: {
+                  ...currentCoordinates.byRow,
+                  [row]: [...currentCoordinates.byRow[row], col],
                 },
               };
             }
             return {
               ...currentCoordinates,
-              allYs: [...currentCoordinates.allYs, y],
-              byY: {
-                ...currentCoordinates.byY,
-                [y]: [x],
+              rows: [...currentCoordinates.rows, row],
+              byRow: {
+                ...currentCoordinates.byRow,
+                [row]: [col],
               },
             };
           },
-          { allYs: [], byY: {} } as CoordinateCollection
+          { rows: [], byRow: {} } as CoordinateCollection
         );
 
         // Set active block data in state
@@ -87,10 +87,10 @@ const blockSlice = createSlice({
     },
     translateActiveBlock(state, { payload }: PayloadAction<TranslateBlockPayload>) {
       if (state.active) {
-        const { dx, dy } = payload;
+        const { dCol, dRow } = payload;
         const { coordinates } = state.active;
 
-        state.active.coordinates = translateBlock(coordinates, dx, dy);
+        state.active.coordinates = translateBlock(coordinates, dCol, dRow);
       }
     },
     rotateActiveBlock(state, { payload }: PayloadAction<RotateBlockPayload>) {
@@ -128,14 +128,14 @@ const blockSlice = createSlice({
         const { coordinates } = state.active;
 
         // Merge coordinates of active blocks into occupied block data
-        coordinates.allYs.forEach((y) => {
-          if (state.occupied.allYs.includes(y)) {
-            const allXs = [...coordinates.byY[y], ...state.occupied.byY[y]];
+        coordinates.rows.forEach((row) => {
+          if (state.occupied.rows.includes(row)) {
+            const cols = [...coordinates.byRow[row], ...state.occupied.byRow[row]];
 
-            state.occupied.byY[y] = Array.from(new Set(allXs));
+            state.occupied.byRow[row] = Array.from(new Set(cols));
           } else {
-            state.occupied.allYs.push(y);
-            state.occupied.byY[y] = coordinates.byY[y];
+            state.occupied.rows.push(row);
+            state.occupied.byRow[row] = coordinates.byRow[row];
           }
         });
 
@@ -144,21 +144,21 @@ const blockSlice = createSlice({
       }
     },
     clearLine(state, { payload }: PayloadAction<ClearLinePayload>) {
-      const { y } = payload;
+      const { row } = payload;
 
-      // Find and remove row from array of y-indices
-      const yIndex = state.occupied.allYs.findIndex((y2) => y2 === y);
-      state.occupied.allYs.splice(yIndex, 1);
+      // Find and remove row
+      const rowIndex = state.occupied.rows.findIndex((row2) => row2 === row);
+      state.occupied.rows.splice(rowIndex, 1);
 
-      // Loop through remaining y's
-      state.occupied.allYs.forEach((y2, index, ys) => {
-        if (y2 > y) {
-          // Move array of occupied x's down by one
-          state.occupied.byY[y2 - 1] = state.occupied.byY[y2];
-          delete state.occupied.byY[y2];
+      // Loop through remaining rows
+      state.occupied.rows.forEach((row2, index, rows) => {
+        if (row2 > row) {
+          // Move array of occupied columns down by one
+          state.occupied.byRow[row2 - 1] = state.occupied.byRow[row2];
+          delete state.occupied.byRow[row2];
 
-          // Decrement each y by one
-          ys.splice(index, 1, y2 - 1);
+          // Decrement each row by one
+          rows.splice(index, 1, row2 - 1);
         }
       });
 
@@ -173,28 +173,28 @@ export const { fillActiveBlock, translateActiveBlock, rotateActiveBlock, fillBag
   blockSlice.actions;
 
 // Selectors
-export const selectActiveBlockXCoordinatesByY = (state: RootState) => state.block.active?.coordinates.byY;
-export const selectActiveBlockYCoordinates = (state: RootState) => state.block.active?.coordinates.allYs;
+export const selectActiveColumnsByRow = (state: RootState) => state.block.active?.coordinates.byRow;
+export const selectActiveBlockRows = (state: RootState) => state.block.active?.coordinates.rows;
 
 export const selectActiveBlockCoordinates = createSelector(
-  [selectActiveBlockXCoordinatesByY, selectActiveBlockYCoordinates],
-  (byY, allYs) => {
-    if (!byY || !allYs) return [];
+  [selectActiveColumnsByRow, selectActiveBlockRows],
+  (byRow, rows) => {
+    if (!byRow || !rows) return [];
 
-    return allYs.flatMap((y) => byY[y].map<Coordinate>((x) => [x, y]));
+    return rows.flatMap((row) => byRow[row].map<Coordinate>((col) => [col, row]));
   }
 );
 
-export const selectOccupiedXCoordinatesByY = (state: RootState) => state.block.occupied.byY;
-export const selectOccupiedYCoordinates = (state: RootState) => state.block.occupied.allYs;
+export const selectOccupiedColumnsByRow = (state: RootState) => state.block.occupied.byRow;
+export const selectOccupiedRows = (state: RootState) => state.block.occupied.rows;
 
 export const selectOccupiedCoordinates = createSelector(
-  [selectOccupiedXCoordinatesByY, selectOccupiedYCoordinates],
-  (byY, allYs) => allYs.flatMap((y) => byY[y].map<Coordinate>((x) => [x, y]))
+  [selectOccupiedColumnsByRow, selectOccupiedRows],
+  (byRow, rows) => rows.flatMap((row) => byRow[row].map<Coordinate>((col) => [col, row]))
 );
 
 // Thunks
-export function translateActiveBlockIfPossible({ dx, dy }: TranslateBlockPayload): AppThunk<boolean> {
+export function translateActiveBlockIfPossible({ dCol, dRow }: TranslateBlockPayload): AppThunk<boolean> {
   return (dispatch, getState) => {
     // Get coordinates of active block
     const state = getState();
@@ -204,13 +204,13 @@ export function translateActiveBlockIfPossible({ dx, dy }: TranslateBlockPayload
     if (!coordinates) return false;
 
     // Calculate what the translated coordinates would be
-    const nextCoordinates = translateBlock(coordinates, dx, dy);
+    const nextCoordinates = translateBlock(coordinates, dCol, dRow);
 
     // Determine whether these coordinates are valid and apply the translation if we can
     const canTranslate = areBlockCoordinatesValid(nextCoordinates, state.block.occupied);
 
     if (canTranslate) {
-      dispatch(translateActiveBlock({ dx, dy }));
+      dispatch(translateActiveBlock({ dCol, dRow }));
     }
 
     // Return whether we could translate the block in any case
@@ -250,7 +250,7 @@ export function rotateActiveBlockIfPossible({ direction }: RotateBlockPayload): 
 export function moveDownOrLockActiveBlock(): AppThunk {
   return (dispatch) => {
     // Try to move block down and check if we actually did
-    const didTranslate = dispatch(translateActiveBlockIfPossible({ dx: 0, dy: -1 }));
+    const didTranslate = dispatch(translateActiveBlockIfPossible({ dCol: 0, dRow: -1 }));
 
     // If we didn't, lock the block
     if (!didTranslate) {
@@ -267,20 +267,20 @@ export function hardDropActiveBlock(): AppThunk {
 
     // Ensure we actually have a block to drop
     if (activeBlock) {
-      let dy = -1;
+      let dRow = -1;
 
       let translatedCoordinates = activeBlock.coordinates;
 
       // Find maximum amount down we can validly drop the block
       do {
-        dy -= 1;
-        translatedCoordinates = translateBlock(activeBlock.coordinates, 0, dy);
+        dRow -= 1;
+        translatedCoordinates = translateBlock(activeBlock.coordinates, 0, dRow);
       } while (areBlockCoordinatesValid(translatedCoordinates, occupied));
 
-      dy += 1;
+      dRow += 1;
 
       // Drop the block down by that much
-      dispatch(translateActiveBlock({ dx: 0, dy }));
+      dispatch(translateActiveBlock({ dCol: 0, dRow }));
 
       // Lock the piece instantly
       dispatch(lockActiveBlock());
@@ -290,22 +290,22 @@ export function hardDropActiveBlock(): AppThunk {
 
 export function clearFilledLines(): AppThunk<number> {
   return (dispatch, getState) => {
-    let filledYs: number[] = [];
+    let filledRows: number[] = [];
 
     do {
       // Get occupied coordinate data
       const state = getState();
-      const occupiedYs = selectOccupiedYCoordinates(state);
-      const occupiedByY = selectOccupiedXCoordinatesByY(state);
+      const occupiedRows = selectOccupiedRows(state);
+      const occupiedByRow = selectOccupiedColumnsByRow(state);
 
-      // Collect y's that are filled
-      filledYs = occupiedYs.filter((y) => occupiedByY[y].length === 10);
+      // Collect rows that are filled
+      filledRows = occupiedRows.filter((row) => occupiedByRow[row].length === 10);
 
       // As long as at least one line is filled, clear a line
-      if (filledYs.length > 0) dispatch(clearLine({ y: filledYs[0] }));
-    } while (filledYs.length > 0); // Keep going until every filled line is cleared
+      if (filledRows.length > 0) dispatch(clearLine({ row: filledRows[0] }));
+    } while (filledRows.length > 0); // Keep going until every filled line is cleared
 
-    return filledYs.length;
+    return filledRows.length;
   };
 }
 

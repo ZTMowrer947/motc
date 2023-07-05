@@ -41,15 +41,15 @@ function App() {
   });
 
   useKeyListener('ArrowRight', () => {
-    dispatch(translateActiveBlockIfPossible({ dx: 1, dy: 0 }));
+    dispatch(translateActiveBlockIfPossible({ dCol: 1, dRow: 0 }));
   });
 
   useKeyListener('ArrowLeft', () => {
-    dispatch(translateActiveBlockIfPossible({ dx: -1, dy: 0 }));
+    dispatch(translateActiveBlockIfPossible({ dCol: -1, dRow: 0 }));
   });
 
   useKeyListener('ArrowDown', () => {
-    dispatch(translateActiveBlockIfPossible({ dx: 0, dy: -1 }));
+    dispatch(translateActiveBlockIfPossible({ dCol: 0, dRow: -1 }));
   });
 
   useKeyListener('z', () => {
@@ -75,14 +75,14 @@ function App() {
         dispatch(moveDownOrLockActiveBlock());
       }
 
-      coordinates.forEach(([x, y]) => {
+      coordinates.forEach(([col, row]) => {
         const color = blockType ? getBlockColor(blockType) : 'gray';
-        drawSquare(ctx, color, x, y, sideLength);
+        drawSquare(ctx, color, row, col, sideLength);
       });
 
       ctx.fillStyle = 'gray';
-      occupiedCoordinates.forEach(([x, y]) => {
-        drawSquare(ctx, 'gray', x, y, sideLength);
+      occupiedCoordinates.forEach(([col, row]) => {
+        drawSquare(ctx, 'gray', row, col, sideLength);
       });
 
       ctx.font = '20px sans-serif';

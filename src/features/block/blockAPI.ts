@@ -1,8 +1,8 @@
-export type Coordinate = [x: number, y: number];
+export type Coordinate = [col: number, row: number];
 export type CoordinateMap = Record<number, number[]>;
 export type CoordinateCollection = {
-  allYs: number[];
-  byY: CoordinateMap;
+  rows: number[];
+  byRow: CoordinateMap;
 };
 export type BlockType = 'I' | 'O' | 'T' | 'L' | 'J' | 'S' | 'Z';
 
@@ -84,27 +84,27 @@ export function getInitialCoordinatesForBlock(type: BlockType): Coordinate[] {
 }
 
 /**
- * Translates the given block coordinates by the given x and y deltas
+ * Translates the given block coordinates by the given row and column deltas
  * @param coordinates The coordinates to translate
- * @param dx The amount to translate in the x-direction
- * @param dy The amount to translate in the y-direction
+ * @param dCol The number of columns to move
+ * @param dRow TThe number of rows to move
  * @return The translated coordinates
  */
-export function translateBlock(coordinates: CoordinateCollection, dx: number, dy: number): CoordinateCollection {
-  return coordinates.allYs.reduce(
-    (collection, y) => {
-      const newXs = coordinates.byY[y].map((x) => x + dx);
+export function translateBlock(coordinates: CoordinateCollection, dCol: number, dRow: number): CoordinateCollection {
+  return coordinates.rows.reduce(
+    (collection, row) => {
+      const newCols = coordinates.byRow[row].map((col) => col + dCol);
 
       return {
         ...collection,
-        allYs: [...collection.allYs, y + dy],
-        byY: {
-          ...collection.byY,
-          [y + dy]: newXs,
+        rows: [...collection.rows, row + dRow],
+        byRow: {
+          ...collection.byRow,
+          [row + dRow]: newCols,
         },
       };
     },
-    { allYs: [], byY: {} } as CoordinateCollection
+    { rows: [], byRow: {} } as CoordinateCollection
   );
 }
 
@@ -118,53 +118,49 @@ export function translateBlock(coordinates: CoordinateCollection, dx: number, dy
 function findCenterBlock(type: BlockType, coordinates: CoordinateCollection, rotationDelta: 0 | 1 | 2 | 3): Coordinate {
   let centerBlock: Coordinate;
 
-  const allXs = coordinates.allYs.flatMap((y) => coordinates.byY[y]).sort((a, b) => a - b);
+  const cols = coordinates.rows.flatMap((row) => coordinates.byRow[row]).sort((a, b) => a - b);
 
-  const ys = coordinates.allYs;
+  const { rows } = coordinates;
   const isHorizontal = rotationDelta % 2 === 0;
 
   /* istanbul ignore else */
   if (['T', 'L', 'J'].includes(type)) {
     if (isHorizontal) {
-      // Find index of central y-coordinate
-      const centerYIndex = ys.findIndex((y) => coordinates.byY[y].length === 3);
-      const centerY = ys[centerYIndex];
+      const centerRowIdx = rows.findIndex((row) => coordinates.byRow[row].length === 3);
+      const centerRow = rows[centerRowIdx];
 
-      // Get central x-coordinate
-      const centerX = coordinates.byY[centerY][1];
+      const centerCol = coordinates.byRow[centerRow][1];
 
-      centerBlock = [centerX, centerY];
+      centerBlock = [centerCol, centerRow];
     } else {
-      // Find index of central x-coordinate
-      const centerXIndex = allXs.slice(0, allXs.length - 2).findIndex((x, idx) => x === allXs[idx + 2]);
-      const centerX = allXs[centerXIndex];
+      const centerColIdx = cols.slice(0, cols.length - 2).findIndex((col, idx) => col === cols[idx + 2]);
+      const centerCol = cols[centerColIdx];
 
-      // Get central y-coordinate
-      const centerY = ys[1];
+      const centerRow = rows[1];
 
-      centerBlock = [centerX, centerY];
+      centerBlock = [centerCol, centerRow];
     }
   } else if (['S', 'Z'].includes(type)) {
     if (isHorizontal) {
-      // Get x-coordinate shared across ys
-      const sharedXIndex = allXs.slice(0, allXs.length - 1).findIndex((x, idx) => x === allXs[idx + 1]);
-      const sharedX = allXs[sharedXIndex];
+      // Get column shared across rows
+      const sharedColIdx = cols.slice(0, cols.length - 1).findIndex((col, idx) => col === cols[idx + 1]);
+      const sharedCol = cols[sharedColIdx];
 
-      // Get central y-coordinate based on rotation
-      const centerYIndex = rotationDelta === 0 ? 0 : 1;
-      const centerY = ys[centerYIndex];
+      // Get central row based on rotation
+      const centerRowIdx = rotationDelta === 0 ? 0 : 1;
+      const centerRow = rows[centerRowIdx];
 
-      centerBlock = [sharedX, centerY];
+      centerBlock = [sharedCol, centerRow];
     } else {
-      // Get y-coordinate shared across xs
-      const sharedYIndex = ys.findIndex((y) => coordinates.byY[y].length === 2);
-      const sharedY = ys[sharedYIndex];
+      // Get row shared across columns
+      const sharedRowIdx = rows.findIndex((row) => coordinates.byRow[row].length === 2);
+      const sharedRow = rows[sharedRowIdx];
 
-      // Get central x-coordinate based on rotation
-      const centerXIndex = rotationDelta === 1 ? 0 : 1;
-      const centerX = coordinates.byY[sharedY][centerXIndex];
+      // Get central column based on rotation
+      const centerColIdx = rotationDelta === 1 ? 0 : 1;
+      const centerCol = coordinates.byRow[sharedRow][centerColIdx];
 
-      centerBlock = [centerX, sharedY];
+      centerBlock = [centerCol, sharedRow];
     }
   } else {
     throw new Error('I and O-blocks have no central block to rotate about');
@@ -192,19 +188,19 @@ export function rotateBlock(
 
   let newCoordinates: CoordinateCollection;
 
-  // Collect all the x and y coordinates, and sort them
-  const allXs = coordinates.allYs.flatMap((y) => coordinates.byY[y]).sort((a, b) => a - b);
-  const ys = [...coordinates.allYs].sort((a, b) => a - b);
+  // Collect all the rows and columns, and sort them
+  const cols = coordinates.rows.flatMap((row) => coordinates.byRow[row]).sort((a, b) => a - b);
+  const rows = [...coordinates.rows].sort((a, b) => a - b);
 
   if (type === 'I') {
     if (rotationDelta % 2 === 0) {
-      // Get the sole y coordinate
-      const y = ys[0];
+      // Get the sole row
+      const row = rows[0];
 
-      // Get a sorted copy of the x coordinates
-      const xs = [...coordinates.byY[y]].sort((a, b) => a - b);
+      // Get a sorted copy of the columns
+      const colsCopy = [...coordinates.byRow[row]].sort((a, b) => a - b);
 
-      // Use rotation to select final x and the fourth y coordinate
+      // Use rotation to select fourth row and shared column
       let selectionIndex: number;
 
       if (
@@ -215,25 +211,25 @@ export function rotateBlock(
       } else {
         selectionIndex = 1;
       }
-      const finalY = rotationDelta === 0 ? y - 2 : y + 2;
-      const x = xs[selectionIndex];
+      const finalRow = rotationDelta === 0 ? row - 2 : row + 2;
+      const col = colsCopy[selectionIndex];
 
       // Update coordinates
       newCoordinates = {
-        byY: {
-          [y + 1]: [x],
-          [y]: [x],
-          [y - 1]: [x],
-          [finalY]: [x],
+        byRow: {
+          [row + 1]: [col],
+          [row]: [col],
+          [row - 1]: [col],
+          [finalRow]: [col],
         },
-        allYs: [y + 1, y, y - 1, finalY].sort((a, b) => a - b),
+        rows: [row + 1, row, row - 1, finalRow].sort((a, b) => a - b),
       };
     } else {
-      // Find the x coordinate present 4 times
-      const xIndex = allXs.slice(0, allXs.length - 3).findIndex((x, idx) => x === allXs[idx + 3]);
-      const sharedX = allXs[xIndex];
+      // Find the shared column
+      const colIndex = cols.slice(0, cols.length - 3).findIndex((col, idx) => col === cols[idx + 3]);
+      const sharedCol = cols[colIndex];
 
-      // Use rotation to select final y and the fourth x coordinate
+      // Use rotation to select shared row and the fourth column
       let selectionIndex: number;
 
       if (
@@ -244,52 +240,52 @@ export function rotateBlock(
       } else {
         selectionIndex = 2;
       }
-      const y = ys[selectionIndex];
-      const finalX = rotationDelta === 1 ? sharedX - 2 : sharedX + 2;
-      const finalXs = [sharedX - 1, sharedX, sharedX + 1, finalX].sort((a, b) => a - b);
+      const row = rows[selectionIndex];
+      const fourthCol = rotationDelta === 1 ? sharedCol - 2 : sharedCol + 2;
+      const finalCols = [sharedCol - 1, sharedCol, sharedCol + 1, fourthCol].sort((a, b) => a - b);
 
       // Update coordinates
       newCoordinates = {
-        byY: {
-          [y]: finalXs,
+        byRow: {
+          [row]: finalCols,
         },
-        allYs: [y],
+        rows: [row],
       };
     }
   } else {
     const centerBlock = findCenterBlock(type, coordinates, rotationDelta);
 
     // Convert coordinate map into array of coordinates
-    const coordinateArray = ys.flatMap((y) => coordinates.byY[y].map<Coordinate>((x) => [x, y]));
+    const coordinateArray = rows.flatMap((row) => coordinates.byRow[row].map<Coordinate>((col) => [col, row]));
 
     // Rotate each coordinate relative to the central block
     const rotatedCoordinateArray = coordinateArray
-      .map(([x, y]) => [x - centerBlock[0], y - centerBlock[1]])
-      .map(([x, y]) => (direction === 'clockwise' ? [y, -x] : [-y, x]))
-      .map<Coordinate>(([x, y]) => [x + centerBlock[0], y + centerBlock[1]]);
+      .map(([col, row]) => [col - centerBlock[0], row - centerBlock[1]])
+      .map(([col, row]) => (direction === 'clockwise' ? [row, -col] : [-row, col]))
+      .map<Coordinate>(([col, row]) => [col + centerBlock[0], row + centerBlock[1]]);
 
     // Convert the rotated coordinates back into a map structure
     newCoordinates = rotatedCoordinateArray.reduce(
-      (collection, [x, y]) => {
-        if (collection.allYs.includes(y)) {
+      (collection, [col, row]) => {
+        if (collection.rows.includes(row)) {
           return {
             ...collection,
-            byY: {
-              ...collection.byY,
-              [y]: [...collection.byY[y], x].sort((a, b) => a - b),
+            byRow: {
+              ...collection.byRow,
+              [row]: [...collection.byRow[row], col].sort((a, b) => a - b),
             },
           };
         }
         return {
           ...collection,
-          allYs: [...collection.allYs, y].sort((a, b) => a - b),
-          byY: {
-            ...collection.byY,
-            [y]: [x],
+          rows: [...collection.rows, row].sort((a, b) => a - b),
+          byRow: {
+            ...collection.byRow,
+            [row]: [col],
           },
         };
       },
-      { allYs: [], byY: {} } as CoordinateCollection
+      { rows: [], byRow: {} } as CoordinateCollection
     );
   }
 
@@ -308,8 +304,12 @@ export function areBlockCoordinatesValid(
   currentCoordinates: CoordinateCollection,
   occupiedCoordinates: CoordinateCollection
 ): boolean {
-  return currentCoordinates.allYs.every(
-    (y) => y > 0 && currentCoordinates.byY[y].every((x) => x >= 0 && x < 10 && !occupiedCoordinates.byY[y]?.includes(x))
+  return currentCoordinates.rows.every(
+    (row) =>
+      row > 0 &&
+      currentCoordinates.byRow[row].every(
+        (col) => col >= 0 && col < 10 && !occupiedCoordinates.byRow[row]?.includes(col)
+      )
   );
 }
 
@@ -317,19 +317,19 @@ export function areBlockCoordinatesValid(
  * Draws a square on the game box
  * @param ctx The canvas context to use for drawing
  * @param color The color of the square
- * @param x The x-coordinate of the square
- * @param y The y-coordinate of the square
+ * @param row The row of the square
+ * @param col The column of the square
  * @param sideLength The side length of the square
  */
-export function drawSquare(ctx: CanvasRenderingContext2D, color: string, x: number, y: number, sideLength: number) {
+export function drawSquare(ctx: CanvasRenderingContext2D, color: string, row: number, col: number, sideLength: number) {
   // Set colors and line width
   ctx.fillStyle = color;
   ctx.strokeStyle = 'gray';
   ctx.lineWidth = 1;
 
   // Calculate actual coordinates for canvas
-  const realX = 200 + x * sideLength;
-  const realY = (20 - y) * sideLength;
+  const realX = 200 + col * sideLength;
+  const realY = (20 - row) * sideLength;
 
   // Draw square with outline
   ctx.fillRect(realX, realY, sideLength, sideLength);

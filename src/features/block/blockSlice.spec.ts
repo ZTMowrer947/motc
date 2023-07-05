@@ -26,8 +26,8 @@ describe('block reducer', () => {
     const expectedState: BlockState = {
       active: null,
       occupied: {
-        byY: {},
-        allYs: [],
+        byRow: {},
+        rows: [],
       },
       nextBlocks: [],
       lineClears: 0,
@@ -45,70 +45,70 @@ describe('block reducer', () => {
     {
       blockType: 'I',
       expectedCoordinates: {
-        byY: {
+        byRow: {
           21: [3, 4, 5, 6],
         },
-        allYs: [21],
+        rows: [21],
       },
     },
     {
       blockType: 'O',
       expectedCoordinates: {
-        byY: {
+        byRow: {
           21: [4, 5],
           20: [4, 5],
         },
-        allYs: [20, 21],
+        rows: [20, 21],
       },
     },
     {
       blockType: 'T',
       expectedCoordinates: {
-        byY: {
+        byRow: {
           21: [4],
           20: [3, 4, 5],
         },
-        allYs: [20, 21],
+        rows: [20, 21],
       },
     },
     {
       blockType: 'L',
       expectedCoordinates: {
-        byY: {
+        byRow: {
           21: [5],
           20: [3, 4, 5],
         },
-        allYs: [20, 21],
+        rows: [20, 21],
       },
     },
     {
       blockType: 'J',
       expectedCoordinates: {
-        byY: {
+        byRow: {
           21: [3],
           20: [3, 4, 5],
         },
-        allYs: [20, 21],
+        rows: [20, 21],
       },
     },
     {
       blockType: 'S',
       expectedCoordinates: {
-        byY: {
+        byRow: {
           21: [4, 5],
           20: [3, 4],
         },
-        allYs: [20, 21],
+        rows: [20, 21],
       },
     },
     {
       blockType: 'Z',
       expectedCoordinates: {
-        byY: {
+        byRow: {
           21: [3, 4],
           20: [4, 5],
         },
-        allYs: [20, 21],
+        rows: [20, 21],
       },
     },
   ];
@@ -120,8 +120,8 @@ describe('block reducer', () => {
       const initialState: BlockState = {
         active: null,
         occupied: {
-          byY: {},
-          allYs: [],
+          byRow: {},
+          rows: [],
         },
         nextBlocks: [blockType],
         lineClears: 0,
@@ -134,8 +134,8 @@ describe('block reducer', () => {
           rotationDelta: 0,
         },
         occupied: {
-          byY: {},
-          allYs: [],
+          byRow: {},
+          rows: [],
         },
         nextBlocks: [],
         lineClears: 0,
@@ -157,16 +157,16 @@ describe('block reducer', () => {
       active: {
         type: 'I',
         coordinates: {
-          byY: {
+          byRow: {
             21: [3, 4, 5, 6],
           },
-          allYs: [21],
+          rows: [21],
         },
         rotationDelta: 0,
       },
       occupied: {
-        byY: {},
-        allYs: [],
+        byRow: {},
+        rows: [],
       },
       nextBlocks: [],
       lineClears: 0,
@@ -176,16 +176,16 @@ describe('block reducer', () => {
       active: {
         type: 'I',
         coordinates: {
-          byY: {
+          byRow: {
             20: [3, 4, 5, 6],
           },
-          allYs: [20],
+          rows: [20],
         },
         rotationDelta: 0,
       },
       occupied: {
-        byY: {},
-        allYs: [],
+        byRow: {},
+        rows: [],
       },
       nextBlocks: [],
       lineClears: 0,
@@ -193,8 +193,8 @@ describe('block reducer', () => {
 
     // Act
     const action = translateActiveBlock({
-      dx: 0,
-      dy: -1,
+      dCol: 0,
+      dRow: -1,
     });
 
     const finalState = blockReducer(initialState, action);
@@ -209,79 +209,79 @@ describe('block reducer', () => {
       blockType: 'I',
       possibleCoordinates: [
         {
-          byY: {
+          byRow: {
             10: [3, 4, 5, 6],
           },
-          allYs: [10],
+          rows: [10],
         },
         {
-          byY: {
+          byRow: {
             11: [5],
             10: [5],
             9: [5],
             8: [5],
           },
-          allYs: [8, 9, 10, 11],
+          rows: [8, 9, 10, 11],
         },
         {
-          byY: {
+          byRow: {
             9: [3, 4, 5, 6],
           },
-          allYs: [9],
+          rows: [9],
         },
         {
-          byY: {
+          byRow: {
             11: [4],
             10: [4],
             9: [4],
             8: [4],
           },
-          allYs: [8, 9, 10, 11],
+          rows: [8, 9, 10, 11],
         },
       ],
     },
     {
       blockType: 'O',
       possibleCoordinates: Array.from({ length: 4 }, () => ({
-        byY: {
+        byRow: {
           10: [4, 5],
           9: [4, 5],
         },
-        allYs: [9, 10],
+        rows: [9, 10],
       })),
     },
     {
       blockType: 'T',
       possibleCoordinates: [
         {
-          byY: {
+          byRow: {
             10: [4],
             9: [3, 4, 5],
           },
-          allYs: [9, 10],
+          rows: [9, 10],
         },
         {
-          byY: {
+          byRow: {
             10: [4],
             9: [4, 5],
             8: [4],
           },
-          allYs: [8, 9, 10],
+          rows: [8, 9, 10],
         },
         {
-          byY: {
+          byRow: {
             9: [3, 4, 5],
             8: [4],
           },
-          allYs: [8, 9],
+          rows: [8, 9],
         },
         {
-          byY: {
+          byRow: {
             10: [4],
             9: [3, 4],
             8: [4],
           },
-          allYs: [8, 9, 10],
+          rows: [8, 9, 10],
         },
       ],
     },
@@ -289,34 +289,34 @@ describe('block reducer', () => {
       blockType: 'L',
       possibleCoordinates: [
         {
-          byY: {
+          byRow: {
             10: [5],
             9: [3, 4, 5],
           },
-          allYs: [9, 10],
+          rows: [9, 10],
         },
         {
-          byY: {
+          byRow: {
             10: [4],
             9: [4],
             8: [4, 5],
           },
-          allYs: [8, 9, 10],
+          rows: [8, 9, 10],
         },
         {
-          byY: {
+          byRow: {
             9: [3, 4, 5],
             8: [3],
           },
-          allYs: [8, 9],
+          rows: [8, 9],
         },
         {
-          byY: {
+          byRow: {
             10: [3, 4],
             9: [4],
             8: [4],
           },
-          allYs: [8, 9, 10],
+          rows: [8, 9, 10],
         },
       ],
     },
@@ -324,34 +324,34 @@ describe('block reducer', () => {
       blockType: 'J',
       possibleCoordinates: [
         {
-          byY: {
+          byRow: {
             10: [3],
             9: [3, 4, 5],
           },
-          allYs: [9, 10],
+          rows: [9, 10],
         },
         {
-          byY: {
+          byRow: {
             10: [4, 5],
             9: [4],
             8: [4],
           },
-          allYs: [8, 9, 10],
+          rows: [8, 9, 10],
         },
         {
-          byY: {
+          byRow: {
             9: [3, 4, 5],
             8: [5],
           },
-          allYs: [8, 9],
+          rows: [8, 9],
         },
         {
-          byY: {
+          byRow: {
             10: [4],
             9: [4],
             8: [3, 4],
           },
-          allYs: [8, 9, 10],
+          rows: [8, 9, 10],
         },
       ],
     },
@@ -359,34 +359,34 @@ describe('block reducer', () => {
       blockType: 'S',
       possibleCoordinates: [
         {
-          byY: {
+          byRow: {
             10: [4, 5],
             9: [3, 4],
           },
-          allYs: [9, 10],
+          rows: [9, 10],
         },
         {
-          byY: {
+          byRow: {
             10: [4],
             9: [4, 5],
             8: [5],
           },
-          allYs: [8, 9, 10],
+          rows: [8, 9, 10],
         },
         {
-          byY: {
+          byRow: {
             9: [4, 5],
             8: [3, 4],
           },
-          allYs: [8, 9],
+          rows: [8, 9],
         },
         {
-          byY: {
+          byRow: {
             10: [3],
             9: [3, 4],
             8: [4],
           },
-          allYs: [8, 9, 10],
+          rows: [8, 9, 10],
         },
       ],
     },
@@ -394,34 +394,34 @@ describe('block reducer', () => {
       blockType: 'Z',
       possibleCoordinates: [
         {
-          byY: {
+          byRow: {
             10: [3, 4],
             9: [4, 5],
           },
-          allYs: [9, 10],
+          rows: [9, 10],
         },
         {
-          byY: {
+          byRow: {
             10: [5],
             9: [4, 5],
             8: [4],
           },
-          allYs: [8, 9, 10],
+          rows: [8, 9, 10],
         },
         {
-          byY: {
+          byRow: {
             9: [3, 4],
             8: [4, 5],
           },
-          allYs: [8, 9],
+          rows: [8, 9],
         },
         {
-          byY: {
+          byRow: {
             10: [4],
             9: [3, 4],
             8: [3],
           },
-          allYs: [8, 9, 10],
+          rows: [8, 9, 10],
         },
       ],
     },
@@ -450,8 +450,8 @@ describe('block reducer', () => {
               rotationDelta: rotationDelta as 0 | 1 | 2 | 3,
             },
             occupied: {
-              allYs: [],
-              byY: {},
+              rows: [],
+              byRow: {},
             },
             nextBlocks: [],
             lineClears: 0,
@@ -464,8 +464,8 @@ describe('block reducer', () => {
               rotationDelta: nextDelta as 0 | 1 | 2 | 3,
             },
             occupied: {
-              allYs: [],
-              byY: {},
+              rows: [],
+              byRow: {},
             },
             nextBlocks: [],
             lineClears: 0,
@@ -488,8 +488,8 @@ describe('block reducer', () => {
     const initialState: BlockState = {
       active: null,
       occupied: {
-        byY: {},
-        allYs: [],
+        byRow: {},
+        rows: [],
       },
       nextBlocks: [],
       lineClears: 0,
@@ -500,8 +500,8 @@ describe('block reducer', () => {
     const expectedState: BlockState = {
       active: null,
       occupied: {
-        byY: {},
-        allYs: [],
+        byRow: {},
+        rows: [],
       },
       nextBlocks: nextBag,
       lineClears: 0,
@@ -522,16 +522,16 @@ describe('block reducer', () => {
       active: {
         type: 'I',
         coordinates: {
-          byY: {
+          byRow: {
             0: [3, 4, 5, 6],
           },
-          allYs: [0],
+          rows: [0],
         },
         rotationDelta: 0,
       },
       occupied: {
-        byY: {},
-        allYs: [],
+        byRow: {},
+        rows: [],
       },
       nextBlocks: [],
       lineClears: 0,
@@ -540,10 +540,10 @@ describe('block reducer', () => {
     const expectedState: BlockState = {
       active: null,
       occupied: {
-        byY: {
+        byRow: {
           0: [3, 4, 5, 6],
         },
-        allYs: [0],
+        rows: [0],
       },
       nextBlocks: [],
       lineClears: 0,
@@ -563,12 +563,12 @@ describe('block reducer', () => {
     const initialState: BlockState = {
       active: null,
       occupied: {
-        byY: {
+        byRow: {
           1: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
           2: [0, 1, 9],
           3: [1],
         },
-        allYs: [1, 2, 3],
+        rows: [1, 2, 3],
       },
       nextBlocks: [],
       lineClears: 0,
@@ -577,18 +577,18 @@ describe('block reducer', () => {
     const expectedState: BlockState = {
       active: null,
       occupied: {
-        byY: {
+        byRow: {
           1: [0, 1, 9],
           2: [1],
         },
-        allYs: [1, 2],
+        rows: [1, 2],
       },
       nextBlocks: [],
       lineClears: 1,
     };
 
     // Act
-    const action = clearLine({ y: 1 });
+    const action = clearLine({ row: 1 });
 
     const finalState = blockReducer(initialState, action);
 
@@ -601,13 +601,13 @@ describe('block reducer', () => {
     const initialState: BlockState = {
       active: null,
       occupied: {
-        byY: {
+        byRow: {
           1: [1, 4, 5, 6, 7, 9],
           2: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
           3: [0, 1, 9],
           4: [1],
         },
-        allYs: [1, 2, 3, 4],
+        rows: [1, 2, 3, 4],
       },
       nextBlocks: [],
       lineClears: 0,
@@ -616,19 +616,19 @@ describe('block reducer', () => {
     const expectedState: BlockState = {
       active: null,
       occupied: {
-        byY: {
+        byRow: {
           1: [1, 4, 5, 6, 7, 9],
           2: [0, 1, 9],
           3: [1],
         },
-        allYs: [1, 2, 3],
+        rows: [1, 2, 3],
       },
       nextBlocks: [],
       lineClears: 1,
     };
 
     // Act
-    const action = clearLine({ y: 2 });
+    const action = clearLine({ row: 2 });
 
     const finalState = blockReducer(initialState, action);
 
