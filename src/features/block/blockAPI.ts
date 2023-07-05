@@ -1,4 +1,7 @@
-export type Coordinate = [col: number, row: number];
+export interface Coordinate {
+  row: number;
+  col: number;
+}
 export type CoordinateMap = Record<number, number[]>;
 export type CoordinateCollection = {
   rows: number[];
@@ -11,74 +14,80 @@ export type BlockType = 'I' | 'O' | 'T' | 'L' | 'J' | 'S' | 'Z';
  * @param type The type of block
  * @return The array of starting coordinates for the given type of block
  */
-export function getInitialCoordinatesForBlock(type: BlockType): Coordinate[] {
+export function getInitialCoordinatesForBlock(type: BlockType): CoordinateCollection {
   switch (type) {
     case 'I': {
-      return [
-        [3, 21],
-        [4, 21],
-        [5, 21],
-        [6, 21],
-      ];
+      return {
+        rows: [21],
+        byRow: {
+          21: [3, 4, 5, 6],
+        },
+      };
     }
 
     case 'O': {
-      return [
-        [4, 20],
-        [5, 20],
-        [4, 21],
-        [5, 21],
-      ];
+      return {
+        rows: [20, 21],
+        byRow: {
+          20: [4, 5],
+          21: [4, 5],
+        },
+      };
     }
 
     case 'T': {
-      return [
-        [3, 20],
-        [4, 20],
-        [5, 20],
-        [4, 21],
-      ];
+      return {
+        rows: [20, 21],
+        byRow: {
+          20: [3, 4, 5],
+          21: [4],
+        },
+      };
     }
 
     case 'L': {
-      return [
-        [3, 20],
-        [4, 20],
-        [5, 20],
-        [5, 21],
-      ];
+      return {
+        rows: [20, 21],
+        byRow: {
+          20: [3, 4, 5],
+          21: [5],
+        },
+      };
     }
 
     case 'J': {
-      return [
-        [3, 20],
-        [4, 20],
-        [5, 20],
-        [3, 21],
-      ];
+      return {
+        rows: [20, 21],
+        byRow: {
+          20: [3, 4, 5],
+          21: [3],
+        },
+      };
     }
 
     case 'S': {
-      return [
-        [3, 20],
-        [4, 20],
-        [4, 21],
-        [5, 21],
-      ];
+      return {
+        rows: [20, 21],
+        byRow: {
+          20: [3, 4],
+          21: [4, 5],
+        },
+      };
     }
 
     case 'Z': {
-      return [
-        [4, 20],
-        [5, 20],
-        [3, 21],
-        [4, 21],
-      ];
+      return {
+        rows: [20, 21],
+        byRow: {
+          20: [4, 5],
+          21: [3, 4],
+        },
+      };
     }
 
     /* istanbul ignore next */
     default: {
-      return [];
+      throw new Error('Invalid block type');
     }
   }
 }
@@ -115,7 +124,7 @@ export function translateBlock(coordinates: CoordinateCollection, dCol: number, 
  * @param rotationDelta The current rotation state of the block
  * @return The coordinates of the center of the given block
  */
-function findCenterBlock(type: BlockType, coordinates: CoordinateCollection, rotationDelta: 0 | 1 | 2 | 3): Coordinate {
+function findCenterBlock(type: BlockType, coordinates: CoordinateCollection, rotationDelta: 0 | 1 | 2 | 3) {
   let centerBlock: Coordinate;
 
   const cols = coordinates.rows.flatMap((row) => coordinates.byRow[row]).sort((a, b) => a - b);
@@ -131,14 +140,14 @@ function findCenterBlock(type: BlockType, coordinates: CoordinateCollection, rot
 
       const centerCol = coordinates.byRow[centerRow][1];
 
-      centerBlock = [centerCol, centerRow];
+      centerBlock = { row: centerRow, col: centerCol };
     } else {
       const centerColIdx = cols.slice(0, cols.length - 2).findIndex((col, idx) => col === cols[idx + 2]);
       const centerCol = cols[centerColIdx];
 
       const centerRow = rows[1];
 
-      centerBlock = [centerCol, centerRow];
+      centerBlock = { row: centerRow, col: centerCol };
     }
   } else if (['S', 'Z'].includes(type)) {
     if (isHorizontal) {
@@ -150,7 +159,7 @@ function findCenterBlock(type: BlockType, coordinates: CoordinateCollection, rot
       const centerRowIdx = rotationDelta === 0 ? 0 : 1;
       const centerRow = rows[centerRowIdx];
 
-      centerBlock = [sharedCol, centerRow];
+      centerBlock = { row: centerRow, col: sharedCol };
     } else {
       // Get row shared across columns
       const sharedRowIdx = rows.findIndex((row) => coordinates.byRow[row].length === 2);
@@ -160,7 +169,7 @@ function findCenterBlock(type: BlockType, coordinates: CoordinateCollection, rot
       const centerColIdx = rotationDelta === 1 ? 0 : 1;
       const centerCol = coordinates.byRow[sharedRow][centerColIdx];
 
-      centerBlock = [centerCol, sharedRow];
+      centerBlock = { row: sharedRow, col: centerCol };
     }
   } else {
     throw new Error('I and O-blocks have no central block to rotate about');
@@ -256,17 +265,17 @@ export function rotateBlock(
     const centerBlock = findCenterBlock(type, coordinates, rotationDelta);
 
     // Convert coordinate map into array of coordinates
-    const coordinateArray = rows.flatMap((row) => coordinates.byRow[row].map<Coordinate>((col) => [col, row]));
+    const coordinateArray = rows.flatMap((row) => coordinates.byRow[row].map((col) => [col, row]));
 
     // Rotate each coordinate relative to the central block
     const rotatedCoordinateArray = coordinateArray
-      .map(([col, row]) => [col - centerBlock[0], row - centerBlock[1]])
+      .map(([col, row]) => [col - centerBlock.col, row - centerBlock.row])
       .map(([col, row]) => (direction === 'clockwise' ? [row, -col] : [-row, col]))
-      .map<Coordinate>(([col, row]) => [col + centerBlock[0], row + centerBlock[1]]);
+      .map<Coordinate>(([col, row]) => ({ col: col + centerBlock.col, row: row + centerBlock.row }));
 
     // Convert the rotated coordinates back into a map structure
     newCoordinates = rotatedCoordinateArray.reduce(
-      (collection, [col, row]) => {
+      (collection, { row, col }) => {
         if (collection.rows.includes(row)) {
           return {
             ...collection,

@@ -75,13 +75,13 @@ function App() {
         dispatch(moveDownOrLockActiveBlock());
       }
 
-      coordinates.forEach(([col, row]) => {
+      coordinates.forEach(({ row, col }) => {
         const color = blockType ? getBlockColor(blockType) : 'gray';
         drawSquare(ctx, color, row, col, sideLength);
       });
 
       ctx.fillStyle = 'gray';
-      occupiedCoordinates.forEach(([col, row]) => {
+      occupiedCoordinates.forEach(({ row, col }) => {
         drawSquare(ctx, 'gray', row, col, sideLength);
       });
 

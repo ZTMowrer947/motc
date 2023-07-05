@@ -50,37 +50,10 @@ const blockSlice = createSlice({
 
       // Ensure such a block was actually available before continuing
       if (nextBlock) {
-        // Get starting coordinates of selected block type
-        const coordinateArray = getInitialCoordinatesForBlock(nextBlock);
-
-        // Convert into map structure
-        const coordinates = coordinateArray.reduce(
-          (currentCoordinates, [col, row]) => {
-            if (currentCoordinates.rows.includes(row)) {
-              return {
-                ...currentCoordinates,
-                byRow: {
-                  ...currentCoordinates.byRow,
-                  [row]: [...currentCoordinates.byRow[row], col],
-                },
-              };
-            }
-            return {
-              ...currentCoordinates,
-              rows: [...currentCoordinates.rows, row],
-              byRow: {
-                ...currentCoordinates.byRow,
-                [row]: [col],
-              },
-            };
-          },
-          { rows: [], byRow: {} } as CoordinateCollection
-        );
-
         // Set active block data in state
         state.active = {
           type: nextBlock,
-          coordinates,
+          coordinates: getInitialCoordinatesForBlock(nextBlock),
           rotationDelta: 0,
         };
       }
@@ -181,7 +154,7 @@ export const selectActiveBlockCoordinates = createSelector(
   (byRow, rows) => {
     if (!byRow || !rows) return [];
 
-    return rows.flatMap((row) => byRow[row].map<Coordinate>((col) => [col, row]));
+    return rows.flatMap((row) => byRow[row].map<Coordinate>((col) => ({ row, col })));
   }
 );
 
@@ -190,7 +163,7 @@ export const selectOccupiedRows = (state: RootState) => state.block.occupied.row
 
 export const selectOccupiedCoordinates = createSelector(
   [selectOccupiedColumnsByRow, selectOccupiedRows],
-  (byRow, rows) => rows.flatMap((row) => byRow[row].map<Coordinate>((col) => [col, row]))
+  (byRow, rows) => rows.flatMap((row) => byRow[row].map<Coordinate>((col) => ({ row, col })))
 );
 
 // Thunks
