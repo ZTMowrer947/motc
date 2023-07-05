@@ -22,7 +22,8 @@
     "serve": "vite preview",
     "test": "vitest",
     "lint": "eslint src",
-    "lint:prettier": "prettier --write src"
+    "lint:prettier": "prettier --write src",
+    "prepare": "husky install"
   },
   "browserslist": {
     "production": [
@@ -50,7 +51,9 @@
     "eslint-plugin-jsx-a11y": "^6.6.1",
     "eslint-plugin-react": "^7.31.11",
     "eslint-plugin-react-hooks": "^4.6.0",
+    "husky": "^8.0.3",
     "jsdom": "^22.1.0",
+    "lint-staged": "^13.2.3",
     "prettier": "^2.8.1",
     "vite": "^4.3.9",
     "vitest": "^0.32.4"
