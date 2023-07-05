@@ -10,6 +10,15 @@
       "rules": {
         "no-param-reassign": "off"
       }
+    },
+    {
+      "files": ["**/*.@(spec|test).[jt]s?(x)"],
+      "extends": ["plugin:jest/recommended"],
+      "settings": {
+        "jest": {
+          "version": 29
+        }
+      }
     }
   ],
   "parser": "@typescript-eslint/parser",
