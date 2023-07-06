@@ -156,14 +156,18 @@ const pieceSlice = createSlice({
 
         // Merge coordinates of active pieces into occupied piece data
         coordinates.rows.forEach((row) => {
-          if (state.occupied.rows.includes(row)) {
-            const cols = [...coordinates.byRow[row], ...state.occupied.byRow[row]];
+          let colsToAdd = coordinates.byRow[row];
 
-            state.occupied.byRow[row] = Array.from(new Set(cols));
+          if (state.occupied.rows.includes(row)) {
+            colsToAdd = colsToAdd.filter((col) => !state.occupied.byRow[row].includes(col));
           } else {
             state.occupied.rows.push(row);
-            state.occupied.byRow[row] = coordinates.byRow[row];
+            state.occupied.byRow[row] = [];
           }
+
+          // Add unique columns to row and sort them
+          state.occupied.byRow[row].push(...colsToAdd);
+          state.occupied.byRow[row].sort();
         });
 
         // Unset active piece to make way for the next
