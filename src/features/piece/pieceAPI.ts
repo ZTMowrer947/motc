@@ -1,3 +1,5 @@
+import { coordArrayToCollection, coordCollectionToArray } from '@/features/coordinate/helpers';
+import { produce } from 'immer';
 import type { Coordinate, CoordinateCollection } from '../coordinate/types';
 
 export type PieceType = 'I' | 'O' | 'T' | 'L' | 'J' | 'S' | 'Z';
@@ -175,37 +177,33 @@ export function rotatePiece(
     const centerSquare = findPieceCenter(type, coordinates, rotationDelta);
 
     // Convert coordinate map into array of coordinates
-    const coordinateArray = rows.flatMap((row) => coordinates.byRow[row].map((col) => [col, row]));
+    const coordinateArray = coordCollectionToArray(coordinates);
 
     // Rotate each coordinate relative to the central piece
-    const rotatedCoordinateArray = coordinateArray
-      .map(([col, row]) => [col - centerSquare.col, row - centerSquare.row])
-      .map(([col, row]) => (direction === 'clockwise' ? [row, -col] : [-row, col]))
-      .map<Coordinate>(([col, row]) => ({ col: col + centerSquare.col, row: row + centerSquare.row }));
+    const rotatedCoordinateArray = produce(coordinateArray, (draftCoordinates) => {
+      draftCoordinates.forEach(({ row, col }, index) => {
+        const relativeCoordinate = { row: row - centerSquare.row, col: col - centerSquare.col };
+
+        const rotatedRelCoordinate = {
+          row: relativeCoordinate.col,
+          col: relativeCoordinate.row,
+        };
+
+        if (direction === 'clockwise') {
+          rotatedRelCoordinate.row *= -1;
+        } else {
+          rotatedRelCoordinate.col *= -1;
+        }
+
+        draftCoordinates[index] = {
+          row: rotatedRelCoordinate.row + centerSquare.row,
+          col: rotatedRelCoordinate.col + centerSquare.col,
+        };
+      });
+    });
 
     // Convert the rotated coordinates back into a map structure
-    newCoordinates = rotatedCoordinateArray.reduce(
-      (collection, { row, col }) => {
-        if (collection.rows.includes(row)) {
-          return {
-            ...collection,
-            byRow: {
-              ...collection.byRow,
-              [row]: [...collection.byRow[row], col].sort((a, b) => a - b),
-            },
-          };
-        }
-        return {
-          ...collection,
-          rows: [...collection.rows, row].sort((a, b) => a - b),
-          byRow: {
-            ...collection.byRow,
-            [row]: [col],
-          },
-        };
-      },
-      { rows: [], byRow: {} } as CoordinateCollection
-    );
+    newCoordinates = coordArrayToCollection(rotatedCoordinateArray);
   }
 
   return newCoordinates;

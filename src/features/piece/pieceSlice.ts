@@ -1,7 +1,8 @@
 import { createSelector, createSlice, PayloadAction } from '@reduxjs/toolkit';
 import type { RootState, AppThunk } from '@/app/store';
+import { coordCollectionToArray } from '@/features/coordinate/helpers';
 import { arePieceCoordinatesValid, PieceType, rotatePiece, translatePiece } from './pieceAPI';
-import type { Coordinate, CoordinateCollection, CoordinateMap } from '../coordinate/types';
+import type { CoordinateCollection, CoordinateMap } from '../coordinate/types';
 
 // Types
 export interface ActivePieceData {
@@ -205,7 +206,7 @@ export const selectActivePieceCoordinates = createSelector(
   (byRow, rows) => {
     if (!byRow || !rows) return [];
 
-    return rows.flatMap((row) => byRow[row].map<Coordinate>((col) => ({ row, col })));
+    return coordCollectionToArray({ rows, byRow });
   }
 );
 
@@ -214,7 +215,7 @@ export const selectOccupiedRows = (state: RootState) => state.piece.occupied.row
 
 export const selectOccupiedCoordinates = createSelector(
   [selectOccupiedColumnsByRow, selectOccupiedRows],
-  (byRow, rows) => rows.flatMap((row) => byRow[row].map<Coordinate>((col) => ({ row, col })))
+  (byRow, rows) => coordCollectionToArray({ rows, byRow })
 );
 
 // Thunks
