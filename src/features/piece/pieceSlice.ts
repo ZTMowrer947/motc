@@ -5,7 +5,6 @@ import {
   Coordinate,
   CoordinateCollection,
   CoordinateMap,
-  getInitialCoordinatesForPiece,
   rotatePiece,
   translatePiece,
 } from './pieceAPI';
@@ -46,16 +45,64 @@ const pieceSlice = createSlice({
   reducers: {
     fillActivePiece(state) {
       // Grab the next piece in line
-      const nextpiece = state.nextPieces.shift();
+      const type = state.nextPieces.shift();
 
-      // Ensure such a piece was actually available before continuing
-      if (nextpiece) {
+      if (type) {
         // Set active piece data in state
         state.active = {
-          type: nextpiece,
-          coordinates: getInitialCoordinatesForPiece(nextpiece),
+          type,
+          coordinates: {
+            rows: [21],
+            byRow: {
+              21: [],
+            },
+          },
           rotationDelta: 0,
         };
+
+        // For I-block, all the squares are in a line on row 21
+        if (type === 'I') {
+          state.active.coordinates.byRow[21].push(3, 4, 5, 6);
+          return;
+        }
+
+        // All other pieces have at least one pair of squares in the middle columns,
+        // and squares starting on row 20.
+        state.active.coordinates.rows.unshift(20);
+        state.active.coordinates.byRow[20] = [];
+
+        const midCols = [4, 5];
+        const targetRowForMid = type === 'S' ? 21 : 20;
+
+        state.active.coordinates.byRow[targetRowForMid].push(...midCols);
+
+        // O-pieces have the same configuration for their other starting row
+        if (type === 'O') {
+          state.active.coordinates.byRow[21].push(...midCols);
+          return;
+        }
+
+        // S- and Z- pieces have squares on columns 3 and 4
+        // on starting rows 21 or 20, respectively
+        if (type === 'S' || type === 'Z') {
+          const otherCols = [3, 4];
+          const targetRowForOther = type === 'S' ? 20 : 21;
+
+          state.active.coordinates.byRow[targetRowForOther].push(...otherCols);
+          return;
+        }
+
+        // The remaining piece types (J, T, and L) have a square on column 3
+        // of row 20 and one final square on row 20 (column 3, 4, or 5 respectively)
+        state.active.coordinates.byRow[20].unshift(3);
+
+        const topCol: Record<typeof type, number> = {
+          J: 3,
+          T: 4,
+          L: 5,
+        };
+
+        state.active.coordinates.byRow[21].push(topCol[type]);
       }
     },
     translateActivePiece(state, { payload }: PayloadAction<TranslatePiecePayload>) {
