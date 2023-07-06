@@ -57,6 +57,12 @@
       {
         "devDependencies": ["**/*.@(spec|test).[jt]s?(x)", "./src/setupTests.ts"]
       }
+    ],
+    "no-param-reassign": [
+      "error",
+      {
+        "ignorePropertyModificationsForRegex": ["^draft"]
+      }
     ]
   },
   "settings": {

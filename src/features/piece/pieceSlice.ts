@@ -1,7 +1,7 @@
 import { createSelector, createSlice, PayloadAction } from '@reduxjs/toolkit';
+import type { RootState, AppThunk } from '@/app/store';
 import { arePieceCoordinatesValid, PieceType, rotatePiece, translatePiece } from './pieceAPI';
 import type { Coordinate, CoordinateCollection, CoordinateMap } from '../coordinate/types';
-import type { RootState, AppThunk } from '../../app/store';
 
 // Types
 export interface ActivePieceData {
