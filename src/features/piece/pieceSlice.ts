@@ -1,13 +1,6 @@
 import { createSelector, createSlice, PayloadAction } from '@reduxjs/toolkit';
-import {
-  arePieceCoordinatesValid,
-  PieceType,
-  Coordinate,
-  CoordinateCollection,
-  CoordinateMap,
-  rotatePiece,
-  translatePiece,
-} from './pieceAPI';
+import { arePieceCoordinatesValid, PieceType, rotatePiece, translatePiece } from './pieceAPI';
+import type { Coordinate, CoordinateCollection, CoordinateMap } from '../coordinate/types';
 import type { RootState, AppThunk } from '../../app/store';
 
 // Types

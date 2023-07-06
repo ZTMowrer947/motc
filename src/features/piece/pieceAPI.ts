@@ -1,12 +1,5 @@
-export interface Coordinate {
-  row: number;
-  col: number;
-}
-export type CoordinateMap = Record<number, number[]>;
-export type CoordinateCollection = {
-  rows: number[];
-  byRow: CoordinateMap;
-};
+import type { Coordinate, CoordinateCollection } from '../coordinate/types';
+
 export type PieceType = 'I' | 'O' | 'T' | 'L' | 'J' | 'S' | 'Z';
 
 /**

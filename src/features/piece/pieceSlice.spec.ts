@@ -8,14 +8,15 @@ import pieceReducer, {
   rotateActivePiece,
   translateActivePiece,
 } from './pieceSlice';
-import type { PieceType, CoordinateCollection } from './pieceAPI';
+import type { PieceType } from './pieceAPI';
+import { CoordinateCollection } from '../coordinate/types';
 
-interface FillActivepieceSourceEntry {
+interface FillActivePieceSourceEntry {
   pieceType: PieceType;
   expectedCoordinates: CoordinateCollection;
 }
 
-interface RotateActivepieceSourceEntry {
+interface RotateActivePieceSourceEntry {
   pieceType: PieceType;
   possibleCoordinates: CoordinateCollection[];
 }
@@ -41,7 +42,7 @@ describe('piece reducer', () => {
   });
 
   // Configure test case data for next test
-  const fillActivepieceSourceData: FillActivepieceSourceEntry[] = [
+  const fillActivePieceSourceData: FillActivePieceSourceEntry[] = [
     {
       pieceType: 'I',
       expectedCoordinates: {
@@ -114,7 +115,7 @@ describe('piece reducer', () => {
   ];
 
   // Run following test for each type of piece
-  fillActivepieceSourceData.forEach(({ pieceType, expectedCoordinates }) => {
+  fillActivePieceSourceData.forEach(({ pieceType, expectedCoordinates }) => {
     it(`should properly handle fillActivepiece for ${pieceType}-piece`, () => {
       // Arrange
       const initialState: PieceState = {
@@ -204,7 +205,7 @@ describe('piece reducer', () => {
   });
 
   // Configure test case data for piece rotation test
-  const rotateActivepieceSourceData: RotateActivepieceSourceEntry[] = [
+  const rotateActivePieceSourceData: RotateActivePieceSourceEntry[] = [
     {
       pieceType: 'I',
       possibleCoordinates: [
@@ -429,7 +430,7 @@ describe('piece reducer', () => {
   const directions = ['clockwise', 'counterclockwise'] as const;
 
   directions.forEach((direction) => {
-    rotateActivepieceSourceData.forEach(({ pieceType, possibleCoordinates }) => {
+    rotateActivePieceSourceData.forEach(({ pieceType, possibleCoordinates }) => {
       possibleCoordinates.forEach((initialCoordinates, rotationDelta) => {
         let nextDelta: number;
 
