@@ -3,27 +3,27 @@ import Canvas from './features/drawing/Canvas';
 import { useAppDispatch, useAppSelector } from './app/hooks';
 import {
   clearFilledLines,
-  fillActiveBlock,
+  fillActivePiece,
   fillBag,
-  hardDropActiveBlock,
-  moveDownOrLockActiveBlock,
-  rotateActiveBlockIfPossible,
-  selectActiveBlockCoordinates,
+  hardDropActivePiece,
+  moveDownOrLockActivePiece,
+  rotateActivePieceIfPossible,
+  selectActivePieceCoordinates,
   selectOccupiedCoordinates,
-  translateActiveBlockIfPossible,
-} from './features/block/blockSlice';
-import { BlockType, drawSquare, getBlockColor } from './features/block/blockAPI';
+  translateActivePieceIfPossible,
+} from './features/piece/pieceSlice';
+import { PieceType, drawSquare, getPieceColor } from './features/piece/pieceAPI';
 import useKeyListener from './app/hooks/useKeyListener';
 import { shuffle } from './features/rng/randomAPI';
 
-const possibleBlockTypes: BlockType[] = ['I', 'O', 'T', 'L', 'J', 'S', 'Z'];
+const possiblePieceTypes: PieceType[] = ['I', 'O', 'T', 'L', 'J', 'S', 'Z'];
 
 function App() {
-  const blockType = useAppSelector((state) => state.block.active?.type);
-  const coordinates = useAppSelector(selectActiveBlockCoordinates);
-  const nextBlocks = useAppSelector((state) => state.block.nextBlocks);
+  const pieceType = useAppSelector((state) => state.piece.active?.type);
+  const coordinates = useAppSelector(selectActivePieceCoordinates);
+  const nextPieces = useAppSelector((state) => state.piece.nextPieces);
   const occupiedCoordinates = useAppSelector(selectOccupiedCoordinates);
-  const lineClears = useAppSelector((state) => state.block.lineClears);
+  const lineClears = useAppSelector((state) => state.piece.lineClears);
   const dispatch = useAppDispatch();
 
   const height = window.innerHeight - 50;
@@ -31,37 +31,37 @@ function App() {
   const sideLength = height / 20;
 
   useEffect(() => {
-    if (nextBlocks.length === 0) {
-      dispatch(fillBag(shuffle(possibleBlockTypes)));
+    if (nextPieces.length === 0) {
+      dispatch(fillBag(shuffle(possiblePieceTypes)));
     } else if (coordinates.length === 0) {
-      dispatch(fillActiveBlock());
+      dispatch(fillActivePiece());
     } else {
       dispatch(clearFilledLines());
     }
   });
 
   useKeyListener('ArrowRight', () => {
-    dispatch(translateActiveBlockIfPossible({ dCol: 1, dRow: 0 }));
+    dispatch(translateActivePieceIfPossible({ dCol: 1, dRow: 0 }));
   });
 
   useKeyListener('ArrowLeft', () => {
-    dispatch(translateActiveBlockIfPossible({ dCol: -1, dRow: 0 }));
+    dispatch(translateActivePieceIfPossible({ dCol: -1, dRow: 0 }));
   });
 
   useKeyListener('ArrowDown', () => {
-    dispatch(translateActiveBlockIfPossible({ dCol: 0, dRow: -1 }));
+    dispatch(translateActivePieceIfPossible({ dCol: 0, dRow: -1 }));
   });
 
   useKeyListener('z', () => {
-    dispatch(rotateActiveBlockIfPossible({ direction: 'counterclockwise' }));
+    dispatch(rotateActivePieceIfPossible({ direction: 'counterclockwise' }));
   });
 
   useKeyListener('x', () => {
-    dispatch(rotateActiveBlockIfPossible({ direction: 'clockwise' }));
+    dispatch(rotateActivePieceIfPossible({ direction: 'clockwise' }));
   });
 
   useKeyListener(' ', () => {
-    dispatch(hardDropActiveBlock());
+    dispatch(hardDropActivePiece());
   });
 
   const draw = useCallback(
@@ -72,11 +72,11 @@ function App() {
       ctx.fillRect(200, 0, ctx.canvas.height / 2, ctx.canvas.height);
 
       if (frame % 20 === 19) {
-        dispatch(moveDownOrLockActiveBlock());
+        dispatch(moveDownOrLockActivePiece());
       }
 
       coordinates.forEach(({ row, col }) => {
-        const color = blockType ? getBlockColor(blockType) : 'gray';
+        const color = pieceType ? getPieceColor(pieceType) : 'gray';
         drawSquare(ctx, color, row, col, sideLength);
       });
 
@@ -91,7 +91,7 @@ function App() {
       ctx.fillText('Next', ctx.canvas.height + 90, 50);
       ctx.fillText(`Lines: ${lineClears}`, 10, 350);
     },
-    [blockType, coordinates, dispatch, lineClears, occupiedCoordinates, sideLength]
+    [pieceType, coordinates, dispatch, lineClears, occupiedCoordinates, sideLength]
   );
 
   return <Canvas height={height} width={width} draw={draw} />;

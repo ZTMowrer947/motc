@@ -7,14 +7,14 @@ export type CoordinateCollection = {
   rows: number[];
   byRow: CoordinateMap;
 };
-export type BlockType = 'I' | 'O' | 'T' | 'L' | 'J' | 'S' | 'Z';
+export type PieceType = 'I' | 'O' | 'T' | 'L' | 'J' | 'S' | 'Z';
 
 /**
- * Finds and returns the coordinates for dropping a new block of the given type
- * @param type The type of block
- * @return The array of starting coordinates for the given type of block
+ * Finds and returns the coordinates for dropping a new piece of the given type
+ * @param type The type of piece
+ * @return The array of starting coordinates for the given type of piece
  */
-export function getInitialCoordinatesForBlock(type: BlockType): CoordinateCollection {
+export function getInitialCoordinatesForPiece(type: PieceType): CoordinateCollection {
   switch (type) {
     case 'I': {
       return {
@@ -87,19 +87,19 @@ export function getInitialCoordinatesForBlock(type: BlockType): CoordinateCollec
 
     /* istanbul ignore next */
     default: {
-      throw new Error('Invalid block type');
+      throw new Error('Invalid piece type');
     }
   }
 }
 
 /**
- * Translates the given block coordinates by the given row and column deltas
+ * Translates the given piece coordinates by the given row and column deltas
  * @param coordinates The coordinates to translate
  * @param dCol The number of columns to move
  * @param dRow TThe number of rows to move
  * @return The translated coordinates
  */
-export function translateBlock(coordinates: CoordinateCollection, dCol: number, dRow: number): CoordinateCollection {
+export function translatePiece(coordinates: CoordinateCollection, dCol: number, dRow: number): CoordinateCollection {
   return coordinates.rows.reduce(
     (collection, row) => {
       const newCols = coordinates.byRow[row].map((col) => col + dCol);
@@ -118,14 +118,14 @@ export function translateBlock(coordinates: CoordinateCollection, dCol: number, 
 }
 
 /**
- * Attempts to find the center to rotate about of the given block. Applicable for all blocks except I- and O-blocks.
- * @param type The type of block
- * @param coordinates The coordinates of the block
- * @param rotationDelta The current rotation state of the block
- * @return The coordinates of the center of the given block
+ * Attempts to find the center to rotate about of the given piece. Applicable for all pieces except I- and O-pieces.
+ * @param type The type of piece
+ * @param coordinates The coordinates of the piece
+ * @param rotationDelta The current rotation state of the piece
+ * @return The coordinates of the center of the given piece
  */
-function findCenterBlock(type: BlockType, coordinates: CoordinateCollection, rotationDelta: 0 | 1 | 2 | 3) {
-  let centerBlock: Coordinate;
+function findPieceCenter(type: PieceType, coordinates: CoordinateCollection, rotationDelta: 0 | 1 | 2 | 3) {
+  let centerPieces: Coordinate;
 
   const cols = coordinates.rows.flatMap((row) => coordinates.byRow[row]).sort((a, b) => a - b);
 
@@ -140,14 +140,14 @@ function findCenterBlock(type: BlockType, coordinates: CoordinateCollection, rot
 
       const centerCol = coordinates.byRow[centerRow][1];
 
-      centerBlock = { row: centerRow, col: centerCol };
+      centerPieces = { row: centerRow, col: centerCol };
     } else {
       const centerColIdx = cols.slice(0, cols.length - 2).findIndex((col, idx) => col === cols[idx + 2]);
       const centerCol = cols[centerColIdx];
 
       const centerRow = rows[1];
 
-      centerBlock = { row: centerRow, col: centerCol };
+      centerPieces = { row: centerRow, col: centerCol };
     }
   } else if (['S', 'Z'].includes(type)) {
     if (isHorizontal) {
@@ -159,7 +159,7 @@ function findCenterBlock(type: BlockType, coordinates: CoordinateCollection, rot
       const centerRowIdx = rotationDelta === 0 ? 0 : 1;
       const centerRow = rows[centerRowIdx];
 
-      centerBlock = { row: centerRow, col: sharedCol };
+      centerPieces = { row: centerRow, col: sharedCol };
     } else {
       // Get row shared across columns
       const sharedRowIdx = rows.findIndex((row) => coordinates.byRow[row].length === 2);
@@ -169,30 +169,30 @@ function findCenterBlock(type: BlockType, coordinates: CoordinateCollection, rot
       const centerColIdx = rotationDelta === 1 ? 0 : 1;
       const centerCol = coordinates.byRow[sharedRow][centerColIdx];
 
-      centerBlock = { row: sharedRow, col: centerCol };
+      centerPieces = { row: sharedRow, col: centerCol };
     }
   } else {
-    throw new Error('I and O-blocks have no central block to rotate about');
+    throw new Error('I and O-pieces have no central piece to rotate about');
   }
 
-  return centerBlock;
+  return centerPieces;
 }
 
 /**
- * Rotates the given block in the given direction
- * @param type The type of block
- * @param coordinates The coordinates of the block
- * @param rotationDelta The current rotation state of the block
- * @param direction The direction to rotate the block, either clockwise or counterclockwise
- * @return The rotated coordinates of the block
+ * Rotates the given piece in the given direction
+ * @param type The type of piece
+ * @param coordinates The coordinates of the piece
+ * @param rotationDelta The current rotation state of the piece
+ * @param direction The direction to rotate the piece, either clockwise or counterclockwise
+ * @return The rotated coordinates of the piece
  */
-export function rotateBlock(
-  type: BlockType,
+export function rotatePiece(
+  type: PieceType,
   coordinates: CoordinateCollection,
   rotationDelta: 0 | 1 | 2 | 3,
   direction: 'clockwise' | 'counterclockwise'
 ): CoordinateCollection {
-  // An O-block never needs rotated
+  // An O-piece never needs rotated
   if (type === 'O') return coordinates;
 
   let newCoordinates: CoordinateCollection;
@@ -262,16 +262,16 @@ export function rotateBlock(
       };
     }
   } else {
-    const centerBlock = findCenterBlock(type, coordinates, rotationDelta);
+    const centerSquare = findPieceCenter(type, coordinates, rotationDelta);
 
     // Convert coordinate map into array of coordinates
     const coordinateArray = rows.flatMap((row) => coordinates.byRow[row].map((col) => [col, row]));
 
-    // Rotate each coordinate relative to the central block
+    // Rotate each coordinate relative to the central piece
     const rotatedCoordinateArray = coordinateArray
-      .map(([col, row]) => [col - centerBlock.col, row - centerBlock.row])
+      .map(([col, row]) => [col - centerSquare.col, row - centerSquare.row])
       .map(([col, row]) => (direction === 'clockwise' ? [row, -col] : [-row, col]))
-      .map<Coordinate>(([col, row]) => ({ col: col + centerBlock.col, row: row + centerBlock.row }));
+      .map<Coordinate>(([col, row]) => ({ col: col + centerSquare.col, row: row + centerSquare.row }));
 
     // Convert the rotated coordinates back into a map structure
     newCoordinates = rotatedCoordinateArray.reduce(
@@ -302,14 +302,14 @@ export function rotateBlock(
 }
 
 /**
- * Checks the validity of the given coordinates of the active block.
- * A block's coordinates are valid if they are not outside the game box and are
+ * Checks the validity of the given coordinates of the active piece.
+ * A piece's coordinates are valid if they are not outside the game box and are
  * not colliding with any occupied area of the box.
- * @param currentCoordinates The coordinates of the active block
- * @param occupiedCoordinates The coordinates already occupied by previous blocks
- * @returns Whether the active block coordinates are valid.
+ * @param currentCoordinates The coordinates of the active piece
+ * @param occupiedCoordinates The coordinates already occupied by previous pieces
+ * @returns Whether the active piece coordinates are valid.
  */
-export function areBlockCoordinatesValid(
+export function arePieceCoordinatesValid(
   currentCoordinates: CoordinateCollection,
   occupiedCoordinates: CoordinateCollection
 ): boolean {
@@ -345,7 +345,7 @@ export function drawSquare(ctx: CanvasRenderingContext2D, color: string, row: nu
   ctx.strokeRect(realX, realY, sideLength, sideLength);
 }
 
-export function getBlockColor(type: BlockType) {
+export function getPieceColor(type: PieceType) {
   let colors: [number, number, number];
 
   switch (type) {

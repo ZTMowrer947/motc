@@ -1,49 +1,49 @@
 import { describe, it, expect } from 'vitest';
-import blockReducer, {
-  BlockState,
+import pieceReducer, {
+  PieceState,
   clearLine,
-  fillActiveBlock,
+  fillActivePiece,
   fillBag,
-  lockActiveBlock,
-  rotateActiveBlock,
-  translateActiveBlock,
-} from './blockSlice';
-import type { BlockType, CoordinateCollection } from './blockAPI';
+  lockActivePiece,
+  rotateActivePiece,
+  translateActivePiece,
+} from './pieceSlice';
+import type { PieceType, CoordinateCollection } from './pieceAPI';
 
-interface FillActiveBlockSourceEntry {
-  blockType: BlockType;
+interface FillActivepieceSourceEntry {
+  pieceType: PieceType;
   expectedCoordinates: CoordinateCollection;
 }
 
-interface RotateActiveBlockSourceEntry {
-  blockType: BlockType;
+interface RotateActivepieceSourceEntry {
+  pieceType: PieceType;
   possibleCoordinates: CoordinateCollection[];
 }
 
-describe('block reducer', () => {
+describe('piece reducer', () => {
   it('should properly initialize state', () => {
     // Arrange
-    const expectedState: BlockState = {
+    const expectedState: PieceState = {
       active: null,
       occupied: {
         byRow: {},
         rows: [],
       },
-      nextBlocks: [],
+      nextPieces: [],
       lineClears: 0,
     };
 
     // Act
-    const finalState = blockReducer(undefined, { type: 'INIT' });
+    const finalState = pieceReducer(undefined, { type: 'INIT' });
 
     // Assert
     expect(finalState).toEqual(expectedState);
   });
 
   // Configure test case data for next test
-  const fillActiveBlockSourceData: FillActiveBlockSourceEntry[] = [
+  const fillActivepieceSourceData: FillActivepieceSourceEntry[] = [
     {
-      blockType: 'I',
+      pieceType: 'I',
       expectedCoordinates: {
         byRow: {
           21: [3, 4, 5, 6],
@@ -52,7 +52,7 @@ describe('block reducer', () => {
       },
     },
     {
-      blockType: 'O',
+      pieceType: 'O',
       expectedCoordinates: {
         byRow: {
           21: [4, 5],
@@ -62,7 +62,7 @@ describe('block reducer', () => {
       },
     },
     {
-      blockType: 'T',
+      pieceType: 'T',
       expectedCoordinates: {
         byRow: {
           21: [4],
@@ -72,7 +72,7 @@ describe('block reducer', () => {
       },
     },
     {
-      blockType: 'L',
+      pieceType: 'L',
       expectedCoordinates: {
         byRow: {
           21: [5],
@@ -82,7 +82,7 @@ describe('block reducer', () => {
       },
     },
     {
-      blockType: 'J',
+      pieceType: 'J',
       expectedCoordinates: {
         byRow: {
           21: [3],
@@ -92,7 +92,7 @@ describe('block reducer', () => {
       },
     },
     {
-      blockType: 'S',
+      pieceType: 'S',
       expectedCoordinates: {
         byRow: {
           21: [4, 5],
@@ -102,7 +102,7 @@ describe('block reducer', () => {
       },
     },
     {
-      blockType: 'Z',
+      pieceType: 'Z',
       expectedCoordinates: {
         byRow: {
           21: [3, 4],
@@ -113,23 +113,23 @@ describe('block reducer', () => {
     },
   ];
 
-  // Run following test for each type of block
-  fillActiveBlockSourceData.forEach(({ blockType, expectedCoordinates }) => {
-    it(`should properly handle fillActiveBlock for ${blockType}-block`, () => {
+  // Run following test for each type of piece
+  fillActivepieceSourceData.forEach(({ pieceType, expectedCoordinates }) => {
+    it(`should properly handle fillActivepiece for ${pieceType}-piece`, () => {
       // Arrange
-      const initialState: BlockState = {
+      const initialState: PieceState = {
         active: null,
         occupied: {
           byRow: {},
           rows: [],
         },
-        nextBlocks: [blockType],
+        nextPieces: [pieceType],
         lineClears: 0,
       };
 
-      const expectedState: BlockState = {
+      const expectedState: PieceState = {
         active: {
-          type: blockType,
+          type: pieceType,
           coordinates: expectedCoordinates,
           rotationDelta: 0,
         },
@@ -137,23 +137,23 @@ describe('block reducer', () => {
           byRow: {},
           rows: [],
         },
-        nextBlocks: [],
+        nextPieces: [],
         lineClears: 0,
       };
 
       // Act
-      const action = fillActiveBlock();
+      const action = fillActivePiece();
 
-      const finalState = blockReducer(initialState, action);
+      const finalState = pieceReducer(initialState, action);
 
       // Assert
       expect(finalState).toEqual(expectedState);
     });
   });
 
-  it('should properly handle translateActiveBlock', () => {
+  it('should properly handle translateActivepiece', () => {
     // Arrange
-    const initialState: BlockState = {
+    const initialState: PieceState = {
       active: {
         type: 'I',
         coordinates: {
@@ -168,11 +168,11 @@ describe('block reducer', () => {
         byRow: {},
         rows: [],
       },
-      nextBlocks: [],
+      nextPieces: [],
       lineClears: 0,
     };
 
-    const expectedState: BlockState = {
+    const expectedState: PieceState = {
       active: {
         type: 'I',
         coordinates: {
@@ -187,26 +187,26 @@ describe('block reducer', () => {
         byRow: {},
         rows: [],
       },
-      nextBlocks: [],
+      nextPieces: [],
       lineClears: 0,
     };
 
     // Act
-    const action = translateActiveBlock({
+    const action = translateActivePiece({
       dCol: 0,
       dRow: -1,
     });
 
-    const finalState = blockReducer(initialState, action);
+    const finalState = pieceReducer(initialState, action);
 
     // Assert
     expect(finalState).toEqual(expectedState);
   });
 
-  // Configure test case data for block rotation test
-  const rotateActiveBlockSourceData: RotateActiveBlockSourceEntry[] = [
+  // Configure test case data for piece rotation test
+  const rotateActivepieceSourceData: RotateActivepieceSourceEntry[] = [
     {
-      blockType: 'I',
+      pieceType: 'I',
       possibleCoordinates: [
         {
           byRow: {
@@ -241,7 +241,7 @@ describe('block reducer', () => {
       ],
     },
     {
-      blockType: 'O',
+      pieceType: 'O',
       possibleCoordinates: Array.from({ length: 4 }, () => ({
         byRow: {
           10: [4, 5],
@@ -251,7 +251,7 @@ describe('block reducer', () => {
       })),
     },
     {
-      blockType: 'T',
+      pieceType: 'T',
       possibleCoordinates: [
         {
           byRow: {
@@ -286,7 +286,7 @@ describe('block reducer', () => {
       ],
     },
     {
-      blockType: 'L',
+      pieceType: 'L',
       possibleCoordinates: [
         {
           byRow: {
@@ -321,7 +321,7 @@ describe('block reducer', () => {
       ],
     },
     {
-      blockType: 'J',
+      pieceType: 'J',
       possibleCoordinates: [
         {
           byRow: {
@@ -356,7 +356,7 @@ describe('block reducer', () => {
       ],
     },
     {
-      blockType: 'S',
+      pieceType: 'S',
       possibleCoordinates: [
         {
           byRow: {
@@ -391,7 +391,7 @@ describe('block reducer', () => {
       ],
     },
     {
-      blockType: 'Z',
+      pieceType: 'Z',
       possibleCoordinates: [
         {
           byRow: {
@@ -429,7 +429,7 @@ describe('block reducer', () => {
   const directions = ['clockwise', 'counterclockwise'] as const;
 
   directions.forEach((direction) => {
-    rotateActiveBlockSourceData.forEach(({ blockType, possibleCoordinates }) => {
+    rotateActivepieceSourceData.forEach(({ pieceType, possibleCoordinates }) => {
       possibleCoordinates.forEach((initialCoordinates, rotationDelta) => {
         let nextDelta: number;
 
@@ -441,11 +441,11 @@ describe('block reducer', () => {
 
         const expectedCoordinates = possibleCoordinates[nextDelta];
 
-        it(`should properly handle rotateActiveBlock rotating an ${blockType}-block at rotation ${rotationDelta} ${direction}`, () => {
+        it(`should properly handle rotateActivepiece rotating an ${pieceType}-piece at rotation ${rotationDelta} ${direction}`, () => {
           // Arrange
-          const initialState: BlockState = {
+          const initialState: PieceState = {
             active: {
-              type: blockType,
+              type: pieceType,
               coordinates: initialCoordinates,
               rotationDelta: rotationDelta as 0 | 1 | 2 | 3,
             },
@@ -453,13 +453,13 @@ describe('block reducer', () => {
               rows: [],
               byRow: {},
             },
-            nextBlocks: [],
+            nextPieces: [],
             lineClears: 0,
           };
 
-          const expectedState: BlockState = {
+          const expectedState: PieceState = {
             active: {
-              type: blockType,
+              type: pieceType,
               coordinates: expectedCoordinates,
               rotationDelta: nextDelta as 0 | 1 | 2 | 3,
             },
@@ -467,14 +467,14 @@ describe('block reducer', () => {
               rows: [],
               byRow: {},
             },
-            nextBlocks: [],
+            nextPieces: [],
             lineClears: 0,
           };
 
           // Act
-          const action = rotateActiveBlock({ direction });
+          const action = rotateActivePiece({ direction });
 
-          const finalState = blockReducer(initialState, action);
+          const finalState = pieceReducer(initialState, action);
 
           // Assert
           expect(finalState).toEqual(expectedState);
@@ -485,40 +485,40 @@ describe('block reducer', () => {
 
   it('should properly handle fillBag', () => {
     // Arrange
-    const initialState: BlockState = {
+    const initialState: PieceState = {
       active: null,
       occupied: {
         byRow: {},
         rows: [],
       },
-      nextBlocks: [],
+      nextPieces: [],
       lineClears: 0,
     };
 
-    const nextBag: BlockType[] = ['I', 'Z', 'T', 'J', 'S', 'O', 'L'];
+    const nextBag: PieceType[] = ['I', 'Z', 'T', 'J', 'S', 'O', 'L'];
 
-    const expectedState: BlockState = {
+    const expectedState: PieceState = {
       active: null,
       occupied: {
         byRow: {},
         rows: [],
       },
-      nextBlocks: nextBag,
+      nextPieces: nextBag,
       lineClears: 0,
     };
 
     // Act
     const action = fillBag(nextBag);
 
-    const finalState = blockReducer(initialState, action);
+    const finalState = pieceReducer(initialState, action);
 
     // Assert
     expect(finalState).toEqual(expectedState);
   });
 
-  it('should properly handle lockActiveBlock', () => {
+  it('should properly handle lockActivepiece', () => {
     // Arrange
-    const initialState: BlockState = {
+    const initialState: PieceState = {
       active: {
         type: 'I',
         coordinates: {
@@ -533,11 +533,11 @@ describe('block reducer', () => {
         byRow: {},
         rows: [],
       },
-      nextBlocks: [],
+      nextPieces: [],
       lineClears: 0,
     };
 
-    const expectedState: BlockState = {
+    const expectedState: PieceState = {
       active: null,
       occupied: {
         byRow: {
@@ -545,14 +545,14 @@ describe('block reducer', () => {
         },
         rows: [0],
       },
-      nextBlocks: [],
+      nextPieces: [],
       lineClears: 0,
     };
 
     // Act
-    const action = lockActiveBlock();
+    const action = lockActivePiece();
 
-    const finalState = blockReducer(initialState, action);
+    const finalState = pieceReducer(initialState, action);
 
     // Assert
     expect(finalState).toEqual(expectedState);
@@ -560,7 +560,7 @@ describe('block reducer', () => {
 
   it('should properly handle clearLine on bottom row', () => {
     // Arrange
-    const initialState: BlockState = {
+    const initialState: PieceState = {
       active: null,
       occupied: {
         byRow: {
@@ -570,11 +570,11 @@ describe('block reducer', () => {
         },
         rows: [1, 2, 3],
       },
-      nextBlocks: [],
+      nextPieces: [],
       lineClears: 0,
     };
 
-    const expectedState: BlockState = {
+    const expectedState: PieceState = {
       active: null,
       occupied: {
         byRow: {
@@ -583,14 +583,14 @@ describe('block reducer', () => {
         },
         rows: [1, 2],
       },
-      nextBlocks: [],
+      nextPieces: [],
       lineClears: 1,
     };
 
     // Act
     const action = clearLine({ row: 1 });
 
-    const finalState = blockReducer(initialState, action);
+    const finalState = pieceReducer(initialState, action);
 
     // Assert
     expect(finalState).toEqual(expectedState);
@@ -598,7 +598,7 @@ describe('block reducer', () => {
 
   it('should properly handle clearLine on above-ground row', () => {
     // Arrange
-    const initialState: BlockState = {
+    const initialState: PieceState = {
       active: null,
       occupied: {
         byRow: {
@@ -609,11 +609,11 @@ describe('block reducer', () => {
         },
         rows: [1, 2, 3, 4],
       },
-      nextBlocks: [],
+      nextPieces: [],
       lineClears: 0,
     };
 
-    const expectedState: BlockState = {
+    const expectedState: PieceState = {
       active: null,
       occupied: {
         byRow: {
@@ -623,14 +623,14 @@ describe('block reducer', () => {
         },
         rows: [1, 2, 3],
       },
-      nextBlocks: [],
+      nextPieces: [],
       lineClears: 1,
     };
 
     // Act
     const action = clearLine({ row: 2 });
 
-    const finalState = blockReducer(initialState, action);
+    const finalState = pieceReducer(initialState, action);
 
     // Assert
     expect(finalState).toEqual(expectedState);

@@ -1,29 +1,29 @@
 import { createSelector, createSlice, PayloadAction } from '@reduxjs/toolkit';
 import {
-  areBlockCoordinatesValid,
-  BlockType,
+  arePieceCoordinatesValid,
+  PieceType,
   Coordinate,
   CoordinateCollection,
   CoordinateMap,
-  getInitialCoordinatesForBlock,
-  rotateBlock,
-  translateBlock,
-} from './blockAPI';
+  getInitialCoordinatesForPiece,
+  rotatePiece,
+  translatePiece,
+} from './pieceAPI';
 import type { RootState, AppThunk } from '../../app/store';
 
 // Types
-export interface ActiveBlockData {
+export interface ActivePieceData {
   coordinates: CoordinateCollection;
-  type: BlockType;
+  type: PieceType;
   rotationDelta: 0 | 1 | 2 | 3;
 }
 
-interface TranslateBlockPayload {
+interface TranslatePiecePayload {
   dCol: number;
   dRow: number;
 }
 
-interface RotateBlockPayload {
+interface RotatePiece {
   direction: 'clockwise' | 'counterclockwise';
 }
 
@@ -32,33 +32,33 @@ interface ClearLinePayload {
 }
 
 // Slice
-const blockSlice = createSlice({
-  name: 'block',
+const pieceSlice = createSlice({
+  name: 'piece',
   initialState: {
-    active: null as ActiveBlockData | null,
+    active: null as ActivePieceData | null,
     occupied: {
       byRow: {} as CoordinateMap,
       rows: [] as number[],
     },
-    nextBlocks: [] as BlockType[],
+    nextPieces: [] as PieceType[],
     lineClears: 0,
   },
   reducers: {
-    fillActiveBlock(state) {
-      // Grab the next block in line
-      const nextBlock = state.nextBlocks.shift();
+    fillActivePiece(state) {
+      // Grab the next piece in line
+      const nextpiece = state.nextPieces.shift();
 
-      // Ensure such a block was actually available before continuing
-      if (nextBlock) {
-        // Set active block data in state
+      // Ensure such a piece was actually available before continuing
+      if (nextpiece) {
+        // Set active piece data in state
         state.active = {
-          type: nextBlock,
-          coordinates: getInitialCoordinatesForBlock(nextBlock),
+          type: nextpiece,
+          coordinates: getInitialCoordinatesForPiece(nextpiece),
           rotationDelta: 0,
         };
       }
     },
-    translateActiveBlock(state, { payload }: PayloadAction<TranslateBlockPayload>) {
+    translateActivePiece(state, { payload }: PayloadAction<TranslatePiecePayload>) {
       if (state.active) {
         const { dCol, dRow } = payload;
         const { coordinates } = state.active;
@@ -73,12 +73,12 @@ const blockSlice = createSlice({
         coordinates.byRow = newByRow;
       }
     },
-    rotateActiveBlock(state, { payload }: PayloadAction<RotateBlockPayload>) {
+    rotateActivePiece(state, { payload }: PayloadAction<RotatePiece>) {
       if (state.active) {
         const { type, coordinates, rotationDelta } = state.active;
 
-        // Do the actual gruntwork in rotating the block
-        state.active.coordinates = rotateBlock(type, coordinates, rotationDelta, payload.direction);
+        // Do the actual gruntwork in rotating the piece
+        state.active.coordinates = rotatePiece(type, coordinates, rotationDelta, payload.direction);
 
         // Update the rotation delta
         let nextDelta = state.active.rotationDelta;
@@ -100,14 +100,14 @@ const blockSlice = createSlice({
         state.active.rotationDelta = nextDelta as 0 | 1 | 2 | 3;
       }
     },
-    fillBag(state, { payload }: PayloadAction<BlockType[]>) {
-      state.nextBlocks = payload;
+    fillBag(state, { payload }: PayloadAction<PieceType[]>) {
+      state.nextPieces = payload;
     },
-    lockActiveBlock(state) {
+    lockActivePiece(state) {
       if (state.active) {
         const { coordinates } = state.active;
 
-        // Merge coordinates of active blocks into occupied block data
+        // Merge coordinates of active pieces into occupied piece data
         coordinates.rows.forEach((row) => {
           if (state.occupied.rows.includes(row)) {
             const cols = [...coordinates.byRow[row], ...state.occupied.byRow[row]];
@@ -119,7 +119,7 @@ const blockSlice = createSlice({
           }
         });
 
-        // Unset active block to make way for the next
+        // Unset active piece to make way for the next
         state.active = null;
       }
     },
@@ -149,15 +149,15 @@ const blockSlice = createSlice({
 });
 
 // Actions
-export const { fillActiveBlock, translateActiveBlock, rotateActiveBlock, fillBag, lockActiveBlock, clearLine } =
-  blockSlice.actions;
+export const { fillActivePiece, translateActivePiece, rotateActivePiece, fillBag, lockActivePiece, clearLine } =
+  pieceSlice.actions;
 
 // Selectors
-export const selectActiveColumnsByRow = (state: RootState) => state.block.active?.coordinates.byRow;
-export const selectActiveBlockRows = (state: RootState) => state.block.active?.coordinates.rows;
+export const selectActiveColumnsByRow = (state: RootState) => state.piece.active?.coordinates.byRow;
+export const selectActivePieceRows = (state: RootState) => state.piece.active?.coordinates.rows;
 
-export const selectActiveBlockCoordinates = createSelector(
-  [selectActiveColumnsByRow, selectActiveBlockRows],
+export const selectActivePieceCoordinates = createSelector(
+  [selectActiveColumnsByRow, selectActivePieceRows],
   (byRow, rows) => {
     if (!byRow || !rows) return [];
 
@@ -165,8 +165,8 @@ export const selectActiveBlockCoordinates = createSelector(
   }
 );
 
-export const selectOccupiedColumnsByRow = (state: RootState) => state.block.occupied.byRow;
-export const selectOccupiedRows = (state: RootState) => state.block.occupied.rows;
+export const selectOccupiedColumnsByRow = (state: RootState) => state.piece.occupied.byRow;
+export const selectOccupiedRows = (state: RootState) => state.piece.occupied.rows;
 
 export const selectOccupiedCoordinates = createSelector(
   [selectOccupiedColumnsByRow, selectOccupiedRows],
@@ -174,96 +174,96 @@ export const selectOccupiedCoordinates = createSelector(
 );
 
 // Thunks
-export function translateActiveBlockIfPossible({ dCol, dRow }: TranslateBlockPayload): AppThunk<boolean> {
+export function translateActivePieceIfPossible({ dCol, dRow }: TranslatePiecePayload): AppThunk<boolean> {
   return (dispatch, getState) => {
-    // Get coordinates of active block
+    // Get coordinates of active piece
     const state = getState();
-    const coordinates = state.block.active?.coordinates;
+    const coordinates = state.piece.active?.coordinates;
 
-    // If no active block is set, we can't do anything, so we don't
+    // If no active piece is set, we can't do anything, so we don't
     if (!coordinates) return false;
 
     // Calculate what the translated coordinates would be
-    const nextCoordinates = translateBlock(coordinates, dCol, dRow);
+    const nextCoordinates = translatePiece(coordinates, dCol, dRow);
 
     // Determine whether these coordinates are valid and apply the translation if we can
-    const canTranslate = areBlockCoordinatesValid(nextCoordinates, state.block.occupied);
+    const canTranslate = arePieceCoordinatesValid(nextCoordinates, state.piece.occupied);
 
     if (canTranslate) {
-      dispatch(translateActiveBlock({ dCol, dRow }));
+      dispatch(translateActivePiece({ dCol, dRow }));
     }
 
-    // Return whether we could translate the block in any case
+    // Return whether we could translate the piece in any case
     return canTranslate;
   };
 }
 
-export function rotateActiveBlockIfPossible({ direction }: RotateBlockPayload): AppThunk<boolean> {
+export function rotateActivePieceIfPossible({ direction }: RotatePiece): AppThunk<boolean> {
   return (dispatch, getState) => {
-    // Get active block
+    // Get active piece
     const state = getState();
-    const { active: activeBlock } = state.block;
+    const { active: activepiece } = state.piece;
 
-    // If no active block is set, we can't do anything, so we don't
-    if (!activeBlock) return false;
+    // If no active piece is set, we can't do anything, so we don't
+    if (!activepiece) return false;
 
     // Calculate what the rotated coordinates would be
-    const nextCoordinates = rotateBlock(
-      activeBlock.type,
-      activeBlock.coordinates,
-      activeBlock.rotationDelta,
+    const nextCoordinates = rotatePiece(
+      activepiece.type,
+      activepiece.coordinates,
+      activepiece.rotationDelta,
       direction
     );
 
     // Determine whether these coordinates are valid and apply the rotation if we can
-    const canRotate = areBlockCoordinatesValid(nextCoordinates, state.block.occupied);
+    const canRotate = arePieceCoordinatesValid(nextCoordinates, state.piece.occupied);
 
     if (canRotate) {
-      dispatch(rotateActiveBlock({ direction }));
+      dispatch(rotateActivePiece({ direction }));
     }
 
-    // Return whether we could translate the block in any case
+    // Return whether we could translate the piece in any case
     return canRotate;
   };
 }
 
-export function moveDownOrLockActiveBlock(): AppThunk {
+export function moveDownOrLockActivePiece(): AppThunk {
   return (dispatch) => {
-    // Try to move block down and check if we actually did
-    const didTranslate = dispatch(translateActiveBlockIfPossible({ dCol: 0, dRow: -1 }));
+    // Try to move piece down and check if we actually did
+    const didTranslate = dispatch(translateActivePieceIfPossible({ dCol: 0, dRow: -1 }));
 
-    // If we didn't, lock the block
+    // If we didn't, lock the piece
     if (!didTranslate) {
-      dispatch(lockActiveBlock());
+      dispatch(lockActivePiece());
     }
   };
 }
 
-export function hardDropActiveBlock(): AppThunk {
+export function hardDropActivePiece(): AppThunk {
   return (dispatch, getState) => {
-    // Get occupied and active block coordinate data
+    // Get occupied and active piece coordinate data
     const state = getState();
-    const { active: activeBlock, occupied } = state.block;
+    const { active: activepiece, occupied } = state.piece;
 
-    // Ensure we actually have a block to drop
-    if (activeBlock) {
+    // Ensure we actually have a piece to drop
+    if (activepiece) {
       let dRow = -1;
 
-      let translatedCoordinates = activeBlock.coordinates;
+      let translatedCoordinates = activepiece.coordinates;
 
-      // Find maximum amount down we can validly drop the block
+      // Find maximum amount down we can validly drop the piece
       do {
         dRow -= 1;
-        translatedCoordinates = translateBlock(activeBlock.coordinates, 0, dRow);
-      } while (areBlockCoordinatesValid(translatedCoordinates, occupied));
+        translatedCoordinates = translatePiece(activepiece.coordinates, 0, dRow);
+      } while (arePieceCoordinatesValid(translatedCoordinates, occupied));
 
       dRow += 1;
 
-      // Drop the block down by that much
-      dispatch(translateActiveBlock({ dCol: 0, dRow }));
+      // Drop the piece down by that much
+      dispatch(translateActivePiece({ dCol: 0, dRow }));
 
       // Lock the piece instantly
-      dispatch(lockActiveBlock());
+      dispatch(lockActivePiece());
     }
   };
 }
@@ -290,5 +290,5 @@ export function clearFilledLines(): AppThunk<number> {
 }
 
 // Reducer
-export type BlockState = Readonly<ReturnType<typeof blockSlice.reducer>>;
-export default blockSlice.reducer;
+export type PieceState = Readonly<ReturnType<typeof pieceSlice.reducer>>;
+export default pieceSlice.reducer;

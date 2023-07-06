@@ -1,9 +1,9 @@
 import { configureStore, ThunkAction, Action } from '@reduxjs/toolkit';
-import blockReducer from '../features/block/blockSlice';
+import piece from '../features/piece/pieceSlice';
 
 export const store = configureStore({
   reducer: {
-    block: blockReducer,
+    piece,
   },
 });
 
