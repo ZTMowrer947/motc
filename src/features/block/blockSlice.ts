@@ -63,7 +63,14 @@ const blockSlice = createSlice({
         const { dCol, dRow } = payload;
         const { coordinates } = state.active;
 
-        state.active.coordinates = translateBlock(coordinates, dCol, dRow);
+        const newByRow: CoordinateMap = {};
+
+        coordinates.rows.forEach((row, index) => {
+          coordinates.rows.splice(index, 1, row + dRow);
+          newByRow[row + dRow] = coordinates.byRow[row].map((col) => col + dCol);
+        });
+
+        coordinates.byRow = newByRow;
       }
     },
     rotateActiveBlock(state, { payload }: PayloadAction<RotateBlockPayload>) {
