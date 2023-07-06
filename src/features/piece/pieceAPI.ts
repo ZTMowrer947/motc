@@ -95,6 +95,7 @@ function findPieceCenter(type: PieceType, coordinates: CoordinateCollection, rot
  * @param type The type of piece
  * @param coordinates The coordinates of the piece
  * @param rotationDelta The current rotation state of the piece
+ * @param clockwise Whether the rotation is clockwise.
  * @param direction The direction to rotate the piece, either clockwise or counterclockwise
  * @return The rotated coordinates of the piece
  */
@@ -102,7 +103,7 @@ export function rotatePiece(
   type: PieceType,
   coordinates: CoordinateCollection,
   rotationDelta: 0 | 1 | 2 | 3,
-  direction: 'clockwise' | 'counterclockwise'
+  clockwise: boolean
 ): CoordinateCollection {
   // An O-piece never needs rotated
   if (type === 'O') return coordinates;
@@ -124,10 +125,7 @@ export function rotatePiece(
       // Use rotation to select fourth row and shared column
       let selectionIndex: number;
 
-      if (
-        (rotationDelta === 0 && direction === 'clockwise') ||
-        (rotationDelta === 2 && direction === 'counterclockwise')
-      ) {
+      if ((rotationDelta === 0 && clockwise) || (rotationDelta === 2 && !clockwise)) {
         selectionIndex = 2;
       } else {
         selectionIndex = 1;
@@ -153,10 +151,7 @@ export function rotatePiece(
       // Use rotation to select shared row and the fourth column
       let selectionIndex: number;
 
-      if (
-        (rotationDelta === 1 && direction === 'clockwise') ||
-        (rotationDelta === 3 && direction === 'counterclockwise')
-      ) {
+      if ((rotationDelta === 1 && clockwise) || (rotationDelta === 3 && !clockwise)) {
         selectionIndex = 1;
       } else {
         selectionIndex = 2;
@@ -189,7 +184,7 @@ export function rotatePiece(
           col: relativeCoordinate.row,
         };
 
-        if (direction === 'clockwise') {
+        if (clockwise) {
           rotatedRelCoordinate.row *= -1;
         } else {
           rotatedRelCoordinate.col *= -1;

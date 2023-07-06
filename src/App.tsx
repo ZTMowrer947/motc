@@ -53,11 +53,11 @@ function App() {
   });
 
   useKeyListener('z', () => {
-    dispatch(rotateActivePieceIfPossible({ direction: 'counterclockwise' }));
+    dispatch(rotateActivePieceIfPossible({ clockwise: false }));
   });
 
   useKeyListener('x', () => {
-    dispatch(rotateActivePieceIfPossible({ direction: 'clockwise' }));
+    dispatch(rotateActivePieceIfPossible({ clockwise: true }));
   });
 
   useKeyListener(' ', () => {

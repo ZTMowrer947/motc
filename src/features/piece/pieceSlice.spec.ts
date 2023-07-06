@@ -473,7 +473,7 @@ describe('piece reducer', () => {
           };
 
           // Act
-          const action = rotateActivePiece({ direction });
+          const action = rotateActivePiece({ clockwise: direction === 'clockwise' });
 
           const finalState = pieceReducer(initialState, action);
 

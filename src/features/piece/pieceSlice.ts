@@ -16,8 +16,8 @@ interface TranslatePiecePayload {
   dRow: number;
 }
 
-interface RotatePiece {
-  direction: 'clockwise' | 'counterclockwise';
+interface RotatePiecePayload {
+  clockwise: boolean;
 }
 
 interface ClearLinePayload {
@@ -114,17 +114,17 @@ const pieceSlice = createSlice({
         coordinates.byRow = newByRow;
       }
     },
-    rotateActivePiece(state, { payload }: PayloadAction<RotatePiece>) {
+    rotateActivePiece(state, { payload }: PayloadAction<RotatePiecePayload>) {
       if (state.active) {
         const { type, coordinates, rotationDelta } = state.active;
 
         // Do the actual gruntwork in rotating the piece
-        state.active.coordinates = rotatePiece(type, coordinates, rotationDelta, payload.direction);
+        state.active.coordinates = rotatePiece(type, coordinates, rotationDelta, payload.clockwise);
 
         // Update the rotation delta
         let nextDelta = state.active.rotationDelta;
 
-        if (payload.direction === 'clockwise') {
+        if (payload.clockwise) {
           nextDelta += 1;
 
           if (nextDelta > 3) {
@@ -243,7 +243,7 @@ export function translateActivePieceIfPossible({ dCol, dRow }: TranslatePiecePay
   };
 }
 
-export function rotateActivePieceIfPossible({ direction }: RotatePiece): AppThunk<boolean> {
+export function rotateActivePieceIfPossible({ clockwise }: RotatePiecePayload): AppThunk<boolean> {
   return (dispatch, getState) => {
     // Get active piece
     const state = getState();
@@ -257,14 +257,14 @@ export function rotateActivePieceIfPossible({ direction }: RotatePiece): AppThun
       activepiece.type,
       activepiece.coordinates,
       activepiece.rotationDelta,
-      direction
+      clockwise
     );
 
     // Determine whether these coordinates are valid and apply the rotation if we can
     const canRotate = arePieceCoordinatesValid(nextCoordinates, state.piece.occupied);
 
     if (canRotate) {
-      dispatch(rotateActivePiece({ direction }));
+      dispatch(rotateActivePiece({ clockwise }));
     }
 
     // Return whether we could translate the piece in any case
