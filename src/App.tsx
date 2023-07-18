@@ -60,9 +60,13 @@ function App() {
     dispatch(rotateActivePieceIfPossible({ clockwise: true }));
   });
 
-  useKeyListener(' ', () => {
-    dispatch(hardDropActivePiece());
-  });
+  useKeyListener(
+    ' ',
+    () => {
+      dispatch(hardDropActivePiece());
+    },
+    { noHold: true }
+  );
 
   const draw = useCallback(
     (ctx: CanvasRenderingContext2D, frame: number) => {
