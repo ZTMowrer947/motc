@@ -7,10 +7,10 @@ import {
   fillBag,
   hardDropActivePiece,
   moveDownOrLockActivePiece,
-  rotateActivePieceIfPossible,
+  tryRotateActivePiece,
   selectActivePieceCoordinates,
   selectOccupiedCoordinates,
-  translateActivePieceIfPossible,
+  tryTranslateActivePiece,
 } from './features/piece/pieceSlice';
 import { PieceType, drawSquare, getPieceColor } from './features/piece/pieceAPI';
 import useKeyListener from './app/hooks/useKeyListener';
@@ -46,12 +46,12 @@ function App() {
     let dCol = key !== 'ArrowDown' ? 1 : 0;
     if (key === 'ArrowLeft') dCol *= -1;
 
-    dispatch(translateActivePieceIfPossible({ dCol, dRow }));
+    dispatch(tryTranslateActivePiece({ dCol, dRow }));
   });
 
   // Piece rotation
   useKeyListener(['z', 'x'], (key) => {
-    dispatch(rotateActivePieceIfPossible({ clockwise: key === 'x' }));
+    dispatch(tryRotateActivePiece({ clockwise: key === 'x' }));
   });
 
   // Hard drop

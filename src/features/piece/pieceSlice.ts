@@ -221,7 +221,7 @@ export const selectOccupiedCoordinates = createSelector(
 );
 
 // Thunks
-export function translateActivePieceIfPossible({ dCol, dRow }: TranslatePiecePayload): AppThunk<boolean> {
+export function tryTranslateActivePiece({ dCol, dRow }: TranslatePiecePayload): AppThunk<boolean> {
   return (dispatch, getState) => {
     // Get coordinates of active piece
     const state = getState();
@@ -242,7 +242,7 @@ export function translateActivePieceIfPossible({ dCol, dRow }: TranslatePiecePay
   };
 }
 
-export function rotateActivePieceIfPossible({ clockwise }: RotatePiecePayload): AppThunk<boolean> {
+export function tryRotateActivePiece({ clockwise }: RotatePiecePayload): AppThunk<boolean> {
   return (dispatch, getState) => {
     // Get active piece
     const state = getState();
@@ -274,7 +274,7 @@ export function rotateActivePieceIfPossible({ clockwise }: RotatePiecePayload): 
 export function moveDownOrLockActivePiece(): AppThunk {
   return (dispatch) => {
     // Try to move piece down and check if we actually did
-    const didTranslate = dispatch(translateActivePieceIfPossible({ dCol: 0, dRow: -1 }));
+    const didTranslate = dispatch(tryTranslateActivePiece({ dCol: 0, dRow: -1 }));
 
     // If we didn't, lock the piece
     if (!didTranslate) {
