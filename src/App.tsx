@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect } from 'react';
 import Canvas from './features/drawing/Canvas';
-import { useAppDispatch, useAppSelector } from './app/hooks';
+import { useAppDispatch, useAppSelector } from './app/hooks/redux';
 import {
   clearFilledLines,
   fillActivePiece,
