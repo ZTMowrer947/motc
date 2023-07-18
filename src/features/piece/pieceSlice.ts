@@ -246,18 +246,14 @@ export function tryRotateActivePiece({ clockwise }: RotatePiecePayload): AppThun
   return (dispatch, getState) => {
     // Get active piece
     const state = getState();
-    const { active: activepiece } = state.piece;
+    const { active } = state.piece;
 
     // If no active piece is set, we can't do anything, so we don't
-    if (!activepiece) return false;
+    if (!active) return false;
 
     // Calculate what the rotated coordinates would be
-    const nextCoordinates = rotatePiece(
-      activepiece.type,
-      activepiece.coordinates,
-      activepiece.rotationDelta,
-      clockwise
-    );
+    const { type, coordinates, rotationDelta } = active;
+    const nextCoordinates = rotatePiece(type, coordinates, rotationDelta, clockwise);
 
     // Determine whether these coordinates are valid and apply the rotation if we can
     const canRotate = arePieceCoordinatesValid(nextCoordinates, state.piece.occupied);
