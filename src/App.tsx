@@ -40,26 +40,21 @@ function App() {
     }
   });
 
-  useKeyListener('ArrowRight', () => {
-    dispatch(translateActivePieceIfPossible({ dCol: 1, dRow: 0 }));
+  // Piece Movement
+  useKeyListener(['ArrowRight', 'ArrowLeft', 'ArrowDown'], (key) => {
+    const dRow = key === 'ArrowDown' ? -1 : 0;
+    let dCol = key !== 'ArrowDown' ? 1 : 0;
+    if (key === 'ArrowLeft') dCol *= -1;
+
+    dispatch(translateActivePieceIfPossible({ dCol, dRow }));
   });
 
-  useKeyListener('ArrowLeft', () => {
-    dispatch(translateActivePieceIfPossible({ dCol: -1, dRow: 0 }));
+  // Piece rotation
+  useKeyListener(['z', 'x'], (key) => {
+    dispatch(rotateActivePieceIfPossible({ clockwise: key === 'x' }));
   });
 
-  useKeyListener('ArrowDown', () => {
-    dispatch(translateActivePieceIfPossible({ dCol: 0, dRow: -1 }));
-  });
-
-  useKeyListener('z', () => {
-    dispatch(rotateActivePieceIfPossible({ clockwise: false }));
-  });
-
-  useKeyListener('x', () => {
-    dispatch(rotateActivePieceIfPossible({ clockwise: true }));
-  });
-
+  // Hard drop
   useKeyListener(
     ' ',
     () => {

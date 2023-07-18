@@ -1,35 +1,38 @@
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 
 interface KeyListenerOptions {
   noHold: boolean;
 }
 
 export default function useKeyListener(
-  key: string,
-  handler: (event: KeyboardEvent) => void,
+  keySet: string | string[],
+  handler: (key: string) => void,
   options: KeyListenerOptions = { noHold: false }
 ): void {
-  const keyHeldRef = useRef(false);
+  const normalizedKeySet = useMemo(() => (typeof keySet === 'string' ? [keySet] : keySet), [keySet]);
+  const keyHeldObj = normalizedKeySet.reduce<Record<string, boolean>>((obj, key) => ({ ...obj, [key]: false }), {});
+
+  const keyHeldRef = useRef(keyHeldObj);
 
   const listener = useCallback(
     (event: KeyboardEvent) => {
-      if (event.key === key && (!options.noHold || !keyHeldRef.current)) {
-        handler(event);
+      if (normalizedKeySet.includes(event.key) && (!options.noHold || !keyHeldRef.current[event.key])) {
+        handler(event.key);
         if (options.noHold) {
-          keyHeldRef.current = true;
+          keyHeldRef.current[event.key] = true;
         }
       }
     },
-    [handler, key, options.noHold]
+    [handler, normalizedKeySet, options.noHold]
   );
 
   const keyUpListener = useCallback(
     (event: KeyboardEvent) => {
-      if (event.key === key && options.noHold) {
-        keyHeldRef.current = false;
+      if (normalizedKeySet.includes(event.key) && options.noHold) {
+        keyHeldRef.current[event.key] = false;
       }
     },
-    [options.noHold, key]
+    [options.noHold, normalizedKeySet]
   );
 
   useEffect(() => {
