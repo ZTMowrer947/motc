@@ -5,31 +5,6 @@ import type { Coordinate, CoordinateCollection } from '../coordinate/types';
 export type PieceType = 'I' | 'O' | 'T' | 'L' | 'J' | 'S' | 'Z';
 
 /**
- * Translates the given piece coordinates by the given row and column deltas
- * @param coordinates The coordinates to translate
- * @param dCol The number of columns to move
- * @param dRow TThe number of rows to move
- * @return The translated coordinates
- */
-export function translatePiece(coordinates: CoordinateCollection, dCol: number, dRow: number): CoordinateCollection {
-  return coordinates.rows.reduce(
-    (collection, row) => {
-      const newCols = coordinates.byRow[row].map((col) => col + dCol);
-
-      return {
-        ...collection,
-        rows: [...collection.rows, row + dRow],
-        byRow: {
-          ...collection.byRow,
-          [row + dRow]: newCols,
-        },
-      };
-    },
-    { rows: [], byRow: {} } as CoordinateCollection
-  );
-}
-
-/**
  * Attempts to find the center to rotate about of the given piece. Applicable for all pieces except I- and O-pieces.
  * @param type The type of piece
  * @param coordinates The coordinates of the piece
@@ -96,7 +71,6 @@ function findPieceCenter(type: PieceType, coordinates: CoordinateCollection, rot
  * @param coordinates The coordinates of the piece
  * @param rotationDelta The current rotation state of the piece
  * @param clockwise Whether the rotation is clockwise.
- * @param direction The direction to rotate the piece, either clockwise or counterclockwise
  * @return The rotated coordinates of the piece
  */
 export function rotatePiece(
@@ -223,6 +197,36 @@ export function arePieceCoordinatesValid(
         (col) => col >= 0 && col < 10 && !occupiedCoordinates.byRow[row]?.includes(col)
       )
   );
+}
+
+/**
+ * Checks the validity of translating the given active piece by the
+ * given deltas.
+ * The active piece's coordinates would be valid if they would not be outside
+ * the game box and would not collide with any occupied area of the box.
+ * @param activeCoordinates
+ * @param occupiedCoordinates
+ * @param dRow
+ * @param dCol
+ */
+export function canTranslatePiece(
+  activeCoordinates: CoordinateCollection,
+  occupiedCoordinates: CoordinateCollection,
+  dRow: number,
+  dCol: number
+): boolean {
+  return activeCoordinates.rows.every((row) => {
+    const newRow = row + dRow;
+
+    return (
+      newRow > 0 &&
+      activeCoordinates.byRow[row].every((col) => {
+        const newCol = col + dCol;
+
+        return newCol >= 0 && newCol < 10 && !occupiedCoordinates.byRow[newRow]?.includes(newCol);
+      })
+    );
+  });
 }
 
 /**

@@ -1,14 +1,16 @@
 import { createSelector, createSlice, PayloadAction } from '@reduxjs/toolkit';
 import type { RootState, AppThunk } from '@/app/store';
 import { coordCollectionToArray } from '@/features/coordinate/helpers';
-import { arePieceCoordinatesValid, PieceType, rotatePiece, translatePiece } from './pieceAPI';
+import { arePieceCoordinatesValid, canTranslatePiece, PieceType, rotatePiece } from './pieceAPI';
 import type { CoordinateCollection, CoordinateMap } from '../coordinate/types';
 
 // Types
+type PieceRotationDelta = 0 | 1 | 2 | 3;
+
 export interface ActivePieceData {
   coordinates: CoordinateCollection;
   type: PieceType;
-  rotationDelta: 0 | 1 | 2 | 3;
+  rotationDelta: PieceRotationDelta;
 }
 
 interface TranslatePiecePayload {
@@ -138,7 +140,7 @@ const pieceSlice = createSlice({
           }
         }
 
-        state.active.rotationDelta = nextDelta as 0 | 1 | 2 | 3;
+        state.active.rotationDelta = nextDelta as PieceRotationDelta;
       }
     },
     fillBag(state, { payload }: PayloadAction<PieceType[]>) {
@@ -228,11 +230,8 @@ export function translateActivePieceIfPossible({ dCol, dRow }: TranslatePiecePay
     // If no active piece is set, we can't do anything, so we don't
     if (!coordinates) return false;
 
-    // Calculate what the translated coordinates would be
-    const nextCoordinates = translatePiece(coordinates, dCol, dRow);
-
-    // Determine whether these coordinates are valid and apply the translation if we can
-    const canTranslate = arePieceCoordinatesValid(nextCoordinates, state.piece.occupied);
+    // Determine if translation is valid, and apply it if so
+    const canTranslate = canTranslatePiece(coordinates, state.piece.occupied, dRow, dCol);
 
     if (canTranslate) {
       dispatch(translateActivePiece({ dCol, dRow }));
@@ -288,19 +287,16 @@ export function hardDropActivePiece(): AppThunk {
   return (dispatch, getState) => {
     // Get occupied and active piece coordinate data
     const state = getState();
-    const { active: activepiece, occupied } = state.piece;
+    const { active: activePiece, occupied } = state.piece;
 
     // Ensure we actually have a piece to drop
-    if (activepiece) {
-      let dRow = -1;
-
-      let translatedCoordinates = activepiece.coordinates;
+    if (activePiece) {
+      let dRow = 0;
 
       // Find maximum amount down we can validly drop the piece
       do {
         dRow -= 1;
-        translatedCoordinates = translatePiece(activepiece.coordinates, 0, dRow);
-      } while (arePieceCoordinatesValid(translatedCoordinates, occupied));
+      } while (canTranslatePiece(activePiece.coordinates, occupied, dRow, 0));
 
       dRow += 1;
 
