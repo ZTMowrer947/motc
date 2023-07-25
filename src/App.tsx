@@ -3,25 +3,20 @@ import Canvas from './features/drawing/Canvas';
 import { useAppDispatch, useAppSelector } from './app/hooks/redux';
 import {
   clearFilledLines,
-  fillActivePiece,
-  fillBag,
   hardDropActivePiece,
   moveDownOrLockActivePiece,
   tryRotateActivePiece,
   selectActivePieceCoordinates,
   selectOccupiedCoordinates,
   tryTranslateActivePiece,
+  fillActivePieceWithBagRefill,
 } from './features/piece/pieceSlice';
-import { PieceType, drawSquare, getPieceColor } from './features/piece/pieceAPI';
+import { drawSquare, getPieceColor } from './features/piece/pieceAPI';
 import useKeyListener from './app/hooks/useKeyListener';
-import { shuffle } from './features/rng/randomAPI';
-
-const possiblePieceTypes: PieceType[] = ['I', 'O', 'T', 'L', 'J', 'S', 'Z'];
 
 function App() {
   const pieceType = useAppSelector((state) => state.piece.active?.type);
   const coordinates = useAppSelector(selectActivePieceCoordinates);
-  const nextPieces = useAppSelector((state) => state.piece.nextPieces);
   const occupiedCoordinates = useAppSelector(selectOccupiedCoordinates);
   const lineClears = useAppSelector((state) => state.piece.lineClears);
   const dispatch = useAppDispatch();
@@ -31,10 +26,8 @@ function App() {
   const sideLength = height / 20;
 
   useEffect(() => {
-    if (nextPieces.length === 0) {
-      dispatch(fillBag(shuffle(possiblePieceTypes)));
-    } else if (coordinates.length === 0) {
-      dispatch(fillActivePiece());
+    if (coordinates.length === 0) {
+      dispatch(fillActivePieceWithBagRefill());
     } else {
       dispatch(clearFilledLines());
     }

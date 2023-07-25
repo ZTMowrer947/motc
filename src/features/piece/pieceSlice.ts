@@ -1,6 +1,7 @@
 import { createSelector, createSlice, PayloadAction } from '@reduxjs/toolkit';
 import type { RootState, AppThunk } from '@/app/store';
 import { coordCollectionToArray } from '@/features/coordinate/helpers';
+import { shuffle } from '@/features/rng/randomAPI';
 import { arePieceCoordinatesValid, canTranslatePiece, PieceType, rotatePiece } from './pieceAPI';
 import type { CoordinateCollection, CoordinateMap } from '../coordinate/types';
 
@@ -27,6 +28,7 @@ interface ClearLinePayload {
 }
 
 // Slice
+const possiblePieceTypes: PieceType[] = ['I', 'O', 'T', 'L', 'J', 'S', 'Z'];
 const pieceSlice = createSlice({
   name: 'piece',
   initialState: {
@@ -144,7 +146,7 @@ const pieceSlice = createSlice({
       }
     },
     fillBag(state, { payload }: PayloadAction<PieceType[]>) {
-      state.nextPieces = payload;
+      state.nextPieces.push(...payload);
     },
     lockActivePiece(state) {
       if (state.active) {
@@ -221,6 +223,25 @@ export const selectOccupiedCoordinates = createSelector(
 );
 
 // Thunks
+export function fillActivePieceWithBagRefill(): AppThunk {
+  return (dispatch, getState) => {
+    // Get list of upcoming pieces and active piece
+    const {
+      piece: { nextPieces, active },
+    } = getState();
+
+    // If the active piece is already in play, do nothing
+    if (active) return;
+
+    // Ensure bag is kept filled for displaying next pieces
+    if (nextPieces.length - 1 < 7) {
+      dispatch(fillBag(shuffle(possiblePieceTypes)));
+    }
+
+    dispatch(fillActivePiece());
+  };
+}
+
 export function tryTranslateActivePiece({ dCol, dRow }: TranslatePiecePayload): AppThunk<boolean> {
   return (dispatch, getState) => {
     // Get coordinates of active piece
