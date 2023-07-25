@@ -222,6 +222,10 @@ export const selectOccupiedCoordinates = createSelector(
   (byRow, rows) => coordCollectionToArray({ rows, byRow })
 );
 
+export const selectFilledRows = createSelector([selectOccupiedColumnsByRow, selectOccupiedRows], (byRow, rows) =>
+  rows.filter((row) => byRow[row].length === 10)
+);
+
 // Thunks
 export function fillActivePieceWithBagRefill(): AppThunk {
   return (dispatch, getState) => {

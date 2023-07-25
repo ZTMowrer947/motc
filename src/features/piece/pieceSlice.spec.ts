@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+import { fillActivePieceSourceData, rotateActivePieceSourceData } from '@/features/piece/__pieceSlice.specdata';
 import pieceReducer, {
   PieceState,
   clearLine,
@@ -9,17 +10,6 @@ import pieceReducer, {
   translateActivePiece,
 } from './pieceSlice';
 import type { PieceType } from './pieceAPI';
-import { CoordinateCollection } from '../coordinate/types';
-
-interface FillActivePieceSourceEntry {
-  pieceType: PieceType;
-  expectedCoordinates: CoordinateCollection;
-}
-
-interface RotateActivePieceSourceEntry {
-  pieceType: PieceType;
-  possibleCoordinates: CoordinateCollection[];
-}
 
 describe('piece reducer', () => {
   it('should properly initialize state', () => {
@@ -41,118 +31,47 @@ describe('piece reducer', () => {
     expect(finalState).toEqual(expectedState);
   });
 
-  // Configure test case data for next test
-  const fillActivePieceSourceData: FillActivePieceSourceEntry[] = [
-    {
-      pieceType: 'I',
-      expectedCoordinates: {
-        byRow: {
-          21: [3, 4, 5, 6],
-        },
-        rows: [21],
-      },
-    },
-    {
-      pieceType: 'O',
-      expectedCoordinates: {
-        byRow: {
-          21: [4, 5],
-          20: [4, 5],
-        },
-        rows: [20, 21],
-      },
-    },
-    {
-      pieceType: 'T',
-      expectedCoordinates: {
-        byRow: {
-          21: [4],
-          20: [3, 4, 5],
-        },
-        rows: [20, 21],
-      },
-    },
-    {
-      pieceType: 'L',
-      expectedCoordinates: {
-        byRow: {
-          21: [5],
-          20: [3, 4, 5],
-        },
-        rows: [20, 21],
-      },
-    },
-    {
-      pieceType: 'J',
-      expectedCoordinates: {
-        byRow: {
-          21: [3],
-          20: [3, 4, 5],
-        },
-        rows: [20, 21],
-      },
-    },
-    {
-      pieceType: 'S',
-      expectedCoordinates: {
-        byRow: {
-          21: [4, 5],
-          20: [3, 4],
-        },
-        rows: [20, 21],
-      },
-    },
-    {
-      pieceType: 'Z',
-      expectedCoordinates: {
-        byRow: {
-          21: [3, 4],
-          20: [4, 5],
-        },
-        rows: [20, 21],
-      },
-    },
-  ];
+  describe('handling fillActivePiece', () => {
+    // Using external source data, run tests for fillActivePiece
+    fillActivePieceSourceData.forEach(({ pieceType, expectedCoordinates }) => {
+      it(`should properly handle initializing the ${pieceType}-piece`, () => {
+        // Arrange
+        const initialState: PieceState = {
+          active: null,
+          occupied: {
+            byRow: {},
+            rows: [],
+          },
+          nextPieces: [pieceType],
+          lineClears: 0,
+        };
 
-  // Run following test for each type of piece
-  fillActivePieceSourceData.forEach(({ pieceType, expectedCoordinates }) => {
-    it(`should properly handle fillActivepiece for ${pieceType}-piece`, () => {
-      // Arrange
-      const initialState: PieceState = {
-        active: null,
-        occupied: {
-          byRow: {},
-          rows: [],
-        },
-        nextPieces: [pieceType],
-        lineClears: 0,
-      };
+        const expectedState: PieceState = {
+          active: {
+            type: pieceType,
+            coordinates: expectedCoordinates,
+            rotationDelta: 0,
+          },
+          occupied: {
+            byRow: {},
+            rows: [],
+          },
+          nextPieces: [],
+          lineClears: 0,
+        };
 
-      const expectedState: PieceState = {
-        active: {
-          type: pieceType,
-          coordinates: expectedCoordinates,
-          rotationDelta: 0,
-        },
-        occupied: {
-          byRow: {},
-          rows: [],
-        },
-        nextPieces: [],
-        lineClears: 0,
-      };
+        // Act
+        const action = fillActivePiece();
 
-      // Act
-      const action = fillActivePiece();
+        const finalState = pieceReducer(initialState, action);
 
-      const finalState = pieceReducer(initialState, action);
-
-      // Assert
-      expect(finalState).toEqual(expectedState);
+        // Assert
+        expect(finalState).toEqual(expectedState);
+      });
     });
   });
 
-  it('should properly handle translateActivepiece', () => {
+  it('should properly handle translateActivePiece', () => {
     // Arrange
     const initialState: PieceState = {
       active: {
@@ -204,281 +123,60 @@ describe('piece reducer', () => {
     expect(finalState).toEqual(expectedState);
   });
 
-  // Configure test case data for piece rotation test
-  const rotateActivePieceSourceData: RotateActivePieceSourceEntry[] = [
-    {
-      pieceType: 'I',
-      possibleCoordinates: [
-        {
-          byRow: {
-            10: [3, 4, 5, 6],
-          },
-          rows: [10],
-        },
-        {
-          byRow: {
-            11: [5],
-            10: [5],
-            9: [5],
-            8: [5],
-          },
-          rows: [8, 9, 10, 11],
-        },
-        {
-          byRow: {
-            9: [3, 4, 5, 6],
-          },
-          rows: [9],
-        },
-        {
-          byRow: {
-            11: [4],
-            10: [4],
-            9: [4],
-            8: [4],
-          },
-          rows: [8, 9, 10, 11],
-        },
-      ],
-    },
-    {
-      pieceType: 'O',
-      possibleCoordinates: Array.from({ length: 4 }, () => ({
-        byRow: {
-          10: [4, 5],
-          9: [4, 5],
-        },
-        rows: [9, 10],
-      })),
-    },
-    {
-      pieceType: 'T',
-      possibleCoordinates: [
-        {
-          byRow: {
-            10: [4],
-            9: [3, 4, 5],
-          },
-          rows: [9, 10],
-        },
-        {
-          byRow: {
-            10: [4],
-            9: [4, 5],
-            8: [4],
-          },
-          rows: [8, 9, 10],
-        },
-        {
-          byRow: {
-            9: [3, 4, 5],
-            8: [4],
-          },
-          rows: [8, 9],
-        },
-        {
-          byRow: {
-            10: [4],
-            9: [3, 4],
-            8: [4],
-          },
-          rows: [8, 9, 10],
-        },
-      ],
-    },
-    {
-      pieceType: 'L',
-      possibleCoordinates: [
-        {
-          byRow: {
-            10: [5],
-            9: [3, 4, 5],
-          },
-          rows: [9, 10],
-        },
-        {
-          byRow: {
-            10: [4],
-            9: [4],
-            8: [4, 5],
-          },
-          rows: [8, 9, 10],
-        },
-        {
-          byRow: {
-            9: [3, 4, 5],
-            8: [3],
-          },
-          rows: [8, 9],
-        },
-        {
-          byRow: {
-            10: [3, 4],
-            9: [4],
-            8: [4],
-          },
-          rows: [8, 9, 10],
-        },
-      ],
-    },
-    {
-      pieceType: 'J',
-      possibleCoordinates: [
-        {
-          byRow: {
-            10: [3],
-            9: [3, 4, 5],
-          },
-          rows: [9, 10],
-        },
-        {
-          byRow: {
-            10: [4, 5],
-            9: [4],
-            8: [4],
-          },
-          rows: [8, 9, 10],
-        },
-        {
-          byRow: {
-            9: [3, 4, 5],
-            8: [5],
-          },
-          rows: [8, 9],
-        },
-        {
-          byRow: {
-            10: [4],
-            9: [4],
-            8: [3, 4],
-          },
-          rows: [8, 9, 10],
-        },
-      ],
-    },
-    {
-      pieceType: 'S',
-      possibleCoordinates: [
-        {
-          byRow: {
-            10: [4, 5],
-            9: [3, 4],
-          },
-          rows: [9, 10],
-        },
-        {
-          byRow: {
-            10: [4],
-            9: [4, 5],
-            8: [5],
-          },
-          rows: [8, 9, 10],
-        },
-        {
-          byRow: {
-            9: [4, 5],
-            8: [3, 4],
-          },
-          rows: [8, 9],
-        },
-        {
-          byRow: {
-            10: [3],
-            9: [3, 4],
-            8: [4],
-          },
-          rows: [8, 9, 10],
-        },
-      ],
-    },
-    {
-      pieceType: 'Z',
-      possibleCoordinates: [
-        {
-          byRow: {
-            10: [3, 4],
-            9: [4, 5],
-          },
-          rows: [9, 10],
-        },
-        {
-          byRow: {
-            10: [5],
-            9: [4, 5],
-            8: [4],
-          },
-          rows: [8, 9, 10],
-        },
-        {
-          byRow: {
-            9: [3, 4],
-            8: [4, 5],
-          },
-          rows: [8, 9],
-        },
-        {
-          byRow: {
-            10: [4],
-            9: [3, 4],
-            8: [3],
-          },
-          rows: [8, 9, 10],
-        },
-      ],
-    },
-  ];
-  const directions = ['clockwise', 'counterclockwise'] as const;
+  // Using external source data, run tests for rotateActivePiece
+  describe('handling rotateActivePiece', () => {
+    Array.from({ length: 2 }, (_, idx) => idx % 2 === 0).forEach((isClockwise) => {
+      rotateActivePieceSourceData.forEach(({ pieceType, possibleCoordinates }) => {
+        possibleCoordinates.forEach((initialCoordinates, rotationDelta) => {
+          // Determine the expected post-rotation delta
+          const nextDelta = (() => {
+            if (isClockwise) return rotationDelta + 1 < 4 ? rotationDelta + 1 : 0;
 
-  directions.forEach((direction) => {
-    rotateActivePieceSourceData.forEach(({ pieceType, possibleCoordinates }) => {
-      possibleCoordinates.forEach((initialCoordinates, rotationDelta) => {
-        let nextDelta: number;
+            return rotationDelta - 1 >= 0 ? rotationDelta - 1 : 3;
+          })();
 
-        if (direction === 'clockwise') {
-          nextDelta = rotationDelta + 1 < 4 ? rotationDelta + 1 : 0;
-        } else {
-          nextDelta = rotationDelta - 1 >= 0 ? rotationDelta - 1 : 3;
-        }
+          const expectedCoordinates = possibleCoordinates[nextDelta];
 
-        const expectedCoordinates = possibleCoordinates[nextDelta];
+          const rotationTypeText = isClockwise ? 'clockwise' : 'counter-clockwise';
 
-        it(`should properly handle rotateActivepiece rotating an ${pieceType}-piece at rotation ${rotationDelta} ${direction}`, () => {
-          // Arrange
-          const initialState: PieceState = {
-            active: {
-              type: pieceType,
-              coordinates: initialCoordinates,
-              rotationDelta: rotationDelta as 0 | 1 | 2 | 3,
-            },
-            occupied: {
-              rows: [],
-              byRow: {},
-            },
-            nextPieces: [],
-            lineClears: 0,
-          };
+          it(`should properly rotate ${pieceType}-piece at rotation ${rotationDelta} ${rotationTypeText}`, () => {
+            // Arrange
+            const initialState: PieceState = {
+              active: {
+                type: pieceType,
+                coordinates: initialCoordinates,
+                rotationDelta: rotationDelta as 0 | 1 | 2 | 3,
+              },
+              occupied: {
+                rows: [],
+                byRow: {},
+              },
+              nextPieces: [],
+              lineClears: 0,
+            };
 
-          const expectedState: PieceState = {
-            active: {
-              type: pieceType,
-              coordinates: expectedCoordinates,
-              rotationDelta: nextDelta as 0 | 1 | 2 | 3,
-            },
-            occupied: {
-              rows: [],
-              byRow: {},
-            },
-            nextPieces: [],
-            lineClears: 0,
-          };
+            const expectedState: PieceState = {
+              active: {
+                type: pieceType,
+                coordinates: expectedCoordinates,
+                rotationDelta: nextDelta as 0 | 1 | 2 | 3,
+              },
+              occupied: {
+                rows: [],
+                byRow: {},
+              },
+              nextPieces: [],
+              lineClears: 0,
+            };
 
-          // Act
-          const action = rotateActivePiece({ clockwise: direction === 'clockwise' });
+            // Act
+            const action = rotateActivePiece({ clockwise: isClockwise });
 
-          const finalState = pieceReducer(initialState, action);
+            const finalState = pieceReducer(initialState, action);
 
-          // Assert
-          expect(finalState).toEqual(expectedState);
+            // Assert
+            expect(finalState).toEqual(expectedState);
+          });
         });
       });
     });
@@ -517,7 +215,7 @@ describe('piece reducer', () => {
     expect(finalState).toEqual(expectedState);
   });
 
-  it('should properly handle lockActivepiece', () => {
+  it('should properly handle lockActivePiece', () => {
     // Arrange
     const initialState: PieceState = {
       active: {
