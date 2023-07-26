@@ -14,19 +14,20 @@ export function randomInt(high: number): number {
   // Get max multiple that is evenly divisible by upper bound
   const highestMultiple = byteMax - (byteMax % high);
 
-  let bytesValue = highestMultiple;
-  while (bytesValue >= highestMultiple) {
+  let byteSum: number;
+  do {
     // Fill byte array with random values
     crypto.getRandomValues(byteArray);
 
     // Sum bytes into actual value
-    bytesValue = byteArray.reduce((acc, byte, idx, array) => acc + byte ** (array.length - idx), 0);
-
-    // If the summed value is not within the unbiased range, loop again until it falls into the correct range
-  }
+    byteSum = byteArray.reduce((acc, byte, idx, array) => acc + byte ** (array.length - idx), 0);
+  } while (
+    // If the summed value is not within the unbiased range, redo
+    byteSum >= highestMultiple
+  );
 
   // Get the remainder of the byte value and the upper bound to get the actual random value we want
-  return bytesValue % high;
+  return byteSum % high;
 }
 
 /**
