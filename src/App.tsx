@@ -11,6 +11,7 @@ import {
   selectOccupiedCoordinates,
   tryTranslateActivePiece,
   fillActivePieceWithBagRefill,
+  selectFilledRows,
 } from './features/piece/pieceSlice';
 import useKeyListener from './app/hooks/useKeyListener';
 
@@ -18,6 +19,7 @@ function App() {
   const pieceType = useAppSelector((state) => state.piece.active?.type);
   const coordinates = useAppSelector(selectActivePieceCoordinates);
   const occupiedCoordinates = useAppSelector(selectOccupiedCoordinates);
+  const filledLines = useAppSelector(selectFilledRows);
   const lineClears = useAppSelector((state) => state.piece.lineClears);
   const dispatch = useAppDispatch();
 
@@ -37,10 +39,14 @@ function App() {
   useEffect(() => {
     if (coordinates.length === 0) {
       dispatch(fillActivePieceWithBagRefill());
-    } else {
+    }
+  }, [coordinates.length, dispatch]);
+
+  useEffect(() => {
+    if (filledLines.length > 0) {
       dispatch(clearFilledLines());
     }
-  });
+  }, [filledLines, dispatch]);
 
   // Piece Movement
   useKeyListener(['ArrowRight', 'ArrowLeft', 'ArrowDown'], (key) => {
