@@ -1,5 +1,6 @@
-import React, { useCallback, useEffect } from 'react';
-import Canvas from './features/drawing/Canvas';
+import React, { useEffect, useMemo } from 'react';
+import Board from '@/features/piece/Board';
+import { bindActionCreators } from '@reduxjs/toolkit';
 import { useAppDispatch, useAppSelector } from './app/hooks/redux';
 import {
   clearFilledLines,
@@ -11,7 +12,6 @@ import {
   tryTranslateActivePiece,
   fillActivePieceWithBagRefill,
 } from './features/piece/pieceSlice';
-import { drawSquare, getPieceColor } from './features/piece/pieceAPI';
 import useKeyListener from './app/hooks/useKeyListener';
 
 function App() {
@@ -21,9 +21,18 @@ function App() {
   const lineClears = useAppSelector((state) => state.piece.lineClears);
   const dispatch = useAppDispatch();
 
-  const height = window.innerHeight - 50;
-  const width = height / 2 + 400;
-  const sideLength = height / 20;
+  const activePiece = useMemo(
+    () =>
+      coordinates && pieceType
+        ? {
+            type: pieceType,
+            coordinates,
+          }
+        : undefined,
+    [coordinates, pieceType]
+  );
+
+  const handleAutoMoveDown = useMemo(() => bindActionCreators(moveDownOrLockActivePiece, dispatch), [dispatch]);
 
   useEffect(() => {
     if (coordinates.length === 0) {
@@ -56,37 +65,14 @@ function App() {
     { noHold: true }
   );
 
-  const draw = useCallback(
-    (ctx: CanvasRenderingContext2D, frame: number) => {
-      ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
-
-      ctx.fillRect(200, 0, ctx.canvas.height / 2, ctx.canvas.height);
-
-      if (frame % 20 === 19) {
-        dispatch(moveDownOrLockActivePiece());
-      }
-
-      coordinates.forEach(({ row, col }) => {
-        const color = pieceType ? getPieceColor(pieceType) : 'gray';
-        drawSquare(ctx, color, row, col, sideLength);
-      });
-
-      ctx.fillStyle = 'gray';
-      occupiedCoordinates.forEach(({ row, col }) => {
-        drawSquare(ctx, 'gray', row, col, sideLength);
-      });
-
-      ctx.font = '20px sans-serif';
-      ctx.fillStyle = 'white';
-      ctx.fillText('Hold', 10, 50);
-      ctx.fillText('Next', ctx.canvas.height + 90, 50);
-      ctx.fillText(`Lines: ${lineClears}`, 10, 350);
-    },
-    [pieceType, coordinates, dispatch, lineClears, occupiedCoordinates, sideLength]
+  return (
+    <Board
+      activePiece={activePiece}
+      occupiedCoordinates={occupiedCoordinates}
+      linesCleared={lineClears}
+      handleAutoMoveDown={handleAutoMoveDown}
+    />
   );
-
-  return <Canvas height={height} width={width} draw={draw} />;
 }
 
 export default App;
