@@ -3,12 +3,12 @@ import type { Coordinate } from '@/features/coordinate/types';
 import { useCallback } from 'react';
 import Canvas from '@/features/drawing/Canvas';
 
-interface ActivePiece {
+export interface ActivePiece {
   type: PieceType;
   coordinates: Coordinate[];
 }
 
-interface BoardProps {
+export interface BoardProps {
   activePiece?: ActivePiece;
   occupiedCoordinates: Coordinate[];
   linesCleared: number;
