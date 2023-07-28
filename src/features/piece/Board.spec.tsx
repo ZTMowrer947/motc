@@ -4,8 +4,6 @@ import { expect, describe, it, vi } from 'vitest';
 import { render, waitFor } from '@testing-library/react';
 import Board, { BoardProps } from '@/features/piece/Board';
 
-import 'canvas';
-
 describe('Board component', () => {
   it('should render without errors', () => {
     const props: BoardProps = {
