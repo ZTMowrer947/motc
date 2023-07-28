@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 
-interface KeyListenerOptions {
+export interface KeyListenerOptions {
   noHold: boolean;
 }
 
