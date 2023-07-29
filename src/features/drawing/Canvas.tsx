@@ -30,7 +30,7 @@ function Canvas({ draw, width, height }: PropTypes) {
     return undefined;
   }, [draw]);
 
-  return <canvas ref={canvasRef} width={width} height={height} />;
+  return <canvas ref={canvasRef} width={width} height={height} data-testid="canvas" />;
 }
 
 export default Canvas;
