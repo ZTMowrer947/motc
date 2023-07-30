@@ -3,17 +3,7 @@
 import { expect, describe, it, vi } from 'vitest';
 import { render, waitFor, screen } from '@testing-library/react';
 import Board, { BoardProps } from '@/features/piece/Board';
-
-// Helper function
-function getCanvasImage(canvas: HTMLCanvasElement): Buffer {
-  // Get data URL and remove starting marker
-  const dataUrl = canvas.toDataURL();
-  const dataMarker = 'data:image/png;base64,';
-  const imageData = dataUrl.slice(dataUrl.indexOf(dataMarker) + dataMarker.length);
-
-  // Create buffer from base64-encoded image data
-  return Buffer.from(imageData, 'base64');
-}
+import getCanvasImage from '@/testutils/getCanvasImage';
 
 describe('Board component', () => {
   it('should properly render an empty board', () => {
