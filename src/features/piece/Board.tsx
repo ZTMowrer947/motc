@@ -28,7 +28,7 @@ export default function Board({ activePiece, occupiedCoordinates, linesCleared, 
     (ctx: CanvasRenderingContext2D, frame: number) => {
       // Clear current canvas
       ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+      ctx.fillStyle = 'rgba(0, 0, 0)';
 
       ctx.fillRect(200, 0, ctx.canvas.height / 2, ctx.canvas.height);
 

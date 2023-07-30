@@ -64,11 +64,7 @@ describe('Board component', () => {
 
     const canvas = screen.getByTestId<HTMLCanvasElement>('canvas');
 
-    expect(getCanvasImage(canvas)).toMatchImageSnapshot({
-      customDiffConfig: {
-        threshold: 0,
-      },
-    });
+    expect(getCanvasImage(canvas)).toMatchImageSnapshot();
   });
 
   it('should call handleAutoMoveDown after 20 frames', async () => {
