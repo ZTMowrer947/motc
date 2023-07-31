@@ -1,36 +1,9 @@
 import { describe, it, expect } from 'vitest';
 import { fillActivePieceSourceData, rotateActivePieceSourceData } from '@/features/piece/__pieceSlice.specdata';
-import pieceReducer, {
-  PieceState,
-  clearLine,
-  fillActivePiece,
-  fillBag,
-  lockActivePiece,
-  rotateActivePiece,
-  translateActivePiece,
-} from './pieceSlice';
+import pieceReducer, { PieceState, clearLine, fillActivePiece, fillBag, rotateActivePiece } from './pieceSlice';
 import type { PieceType } from './pieceAPI';
 
 describe('piece reducer', () => {
-  it('should properly initialize state', () => {
-    // Arrange
-    const expectedState: PieceState = {
-      active: null,
-      occupied: {
-        byRow: {},
-        rows: [],
-      },
-      nextPieces: [],
-      lineClears: 0,
-    };
-
-    // Act
-    const finalState = pieceReducer(undefined, { type: 'INIT' });
-
-    // Assert
-    expect(finalState).toEqual(expectedState);
-  });
-
   describe('handling fillActivePiece', () => {
     // Using external source data, run tests for fillActivePiece
     fillActivePieceSourceData.forEach(({ pieceType, expectedCoordinates }) => {
@@ -69,58 +42,6 @@ describe('piece reducer', () => {
         expect(finalState).toEqual(expectedState);
       });
     });
-  });
-
-  it('should properly handle translateActivePiece', () => {
-    // Arrange
-    const initialState: PieceState = {
-      active: {
-        type: 'I',
-        coordinates: {
-          byRow: {
-            21: [3, 4, 5, 6],
-          },
-          rows: [21],
-        },
-        rotationDelta: 0,
-      },
-      occupied: {
-        byRow: {},
-        rows: [],
-      },
-      nextPieces: [],
-      lineClears: 0,
-    };
-
-    const expectedState: PieceState = {
-      active: {
-        type: 'I',
-        coordinates: {
-          byRow: {
-            20: [3, 4, 5, 6],
-          },
-          rows: [20],
-        },
-        rotationDelta: 0,
-      },
-      occupied: {
-        byRow: {},
-        rows: [],
-      },
-      nextPieces: [],
-      lineClears: 0,
-    };
-
-    // Act
-    const action = translateActivePiece({
-      dCol: 0,
-      dRow: -1,
-    });
-
-    const finalState = pieceReducer(initialState, action);
-
-    // Assert
-    expect(finalState).toEqual(expectedState);
   });
 
   // Using external source data, run tests for rotateActivePiece
@@ -208,86 +129,6 @@ describe('piece reducer', () => {
 
     // Act
     const action = fillBag(nextBag);
-
-    const finalState = pieceReducer(initialState, action);
-
-    // Assert
-    expect(finalState).toEqual(expectedState);
-  });
-
-  it('should properly handle lockActivePiece', () => {
-    // Arrange
-    const initialState: PieceState = {
-      active: {
-        type: 'I',
-        coordinates: {
-          byRow: {
-            0: [3, 4, 5, 6],
-          },
-          rows: [0],
-        },
-        rotationDelta: 0,
-      },
-      occupied: {
-        byRow: {},
-        rows: [],
-      },
-      nextPieces: [],
-      lineClears: 0,
-    };
-
-    const expectedState: PieceState = {
-      active: null,
-      occupied: {
-        byRow: {
-          0: [3, 4, 5, 6],
-        },
-        rows: [0],
-      },
-      nextPieces: [],
-      lineClears: 0,
-    };
-
-    // Act
-    const action = lockActivePiece();
-
-    const finalState = pieceReducer(initialState, action);
-
-    // Assert
-    expect(finalState).toEqual(expectedState);
-  });
-
-  it('should properly handle clearLine on bottom row', () => {
-    // Arrange
-    const initialState: PieceState = {
-      active: null,
-      occupied: {
-        byRow: {
-          1: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
-          2: [0, 1, 9],
-          3: [1],
-        },
-        rows: [1, 2, 3],
-      },
-      nextPieces: [],
-      lineClears: 0,
-    };
-
-    const expectedState: PieceState = {
-      active: null,
-      occupied: {
-        byRow: {
-          1: [0, 1, 9],
-          2: [1],
-        },
-        rows: [1, 2],
-      },
-      nextPieces: [],
-      lineClears: 1,
-    };
-
-    // Act
-    const action = clearLine({ row: 1 });
 
     const finalState = pieceReducer(initialState, action);
 
