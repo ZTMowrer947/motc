@@ -4,6 +4,11 @@ import { expect, describe, it, vi } from 'vitest';
 import { render, waitFor, screen } from '@testing-library/react';
 import Board, { BoardProps } from '@/features/piece/Board';
 import getCanvasImage from '@/testutils/getCanvasImage';
+import { MatchImageSnapshotOptions } from 'jest-image-snapshot';
+
+const imgSnapSharedOptions: MatchImageSnapshotOptions = {
+  comparisonMethod: 'ssim',
+};
 
 describe('Board component', () => {
   it('should properly render an empty board', () => {
@@ -17,7 +22,9 @@ describe('Board component', () => {
 
     const canvas = screen.getByTestId<HTMLCanvasElement>('canvas');
 
-    expect(getCanvasImage(canvas)).toMatchImageSnapshot();
+    expect(getCanvasImage(canvas)).toMatchImageSnapshot({
+      ...imgSnapSharedOptions,
+    });
   });
 
   it('should properly render a game in progress', () => {
@@ -64,7 +71,9 @@ describe('Board component', () => {
 
     const canvas = screen.getByTestId<HTMLCanvasElement>('canvas');
 
-    expect(getCanvasImage(canvas)).toMatchImageSnapshot();
+    expect(getCanvasImage(canvas)).toMatchImageSnapshot({
+      ...imgSnapSharedOptions,
+    });
   });
 
   it('should call handleAutoMoveDown after 20 frames', async () => {
