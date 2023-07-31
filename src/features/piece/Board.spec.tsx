@@ -24,6 +24,7 @@ describe('Board component', () => {
 
     expect(getCanvasImage(canvas)).toMatchImageSnapshot({
       ...imgSnapSharedOptions,
+      customSnapshotIdentifier: 'Board-Empty',
     });
   });
 
@@ -73,6 +74,7 @@ describe('Board component', () => {
 
     expect(getCanvasImage(canvas)).toMatchImageSnapshot({
       ...imgSnapSharedOptions,
+      customSnapshotIdentifier: 'Board-GameInProgress',
     });
   });
 
