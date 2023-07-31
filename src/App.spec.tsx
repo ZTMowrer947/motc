@@ -177,4 +177,66 @@ describe('App component', () => {
       customSnapshotIdentifier: 'App-LineClear-1_Single',
     });
   });
+
+  it('should properly handle rotating a piece in both directions', () => {
+    // Render app
+    setup('X/X/X/X/X/X/X/X/3AAAA3/X/X/X/X/X/X/X/X/X/X/O2OOOO3/OOOOOOOOO1 I 0 - 3 OTSLJZZIOTLSJ');
+    const canvas = screen.getByTestId<HTMLCanvasElement>('canvas');
+
+    // Get initial snapshot
+    expect(getCanvasImage(canvas)).toMatchImageSnapshot({
+      ...imgSnapSharedOptions,
+      customSnapshotIdentifier: 'App-Rotate-0_Initial',
+    });
+
+    // Snapshot rotation all the way around counterclockwise
+    pressKey('z');
+    expect(getCanvasImage(canvas)).toMatchImageSnapshot({
+      ...imgSnapSharedOptions,
+      customSnapshotIdentifier: 'App-Rotate-1_Left90',
+    });
+
+    pressKey('z');
+    expect(getCanvasImage(canvas)).toMatchImageSnapshot({
+      ...imgSnapSharedOptions,
+      customSnapshotIdentifier: 'App-Rotate-2_Left180',
+    });
+
+    pressKey('z');
+    expect(getCanvasImage(canvas)).toMatchImageSnapshot({
+      ...imgSnapSharedOptions,
+      customSnapshotIdentifier: 'App-Rotate-3_Left270',
+    });
+
+    pressKey('z');
+    expect(getCanvasImage(canvas)).toMatchImageSnapshot({
+      ...imgSnapSharedOptions,
+      customSnapshotIdentifier: 'App-Rotate-4_LeftToStart',
+    });
+
+    // Snapshot rotation all the way around clockwise
+    pressKey('x');
+    expect(getCanvasImage(canvas)).toMatchImageSnapshot({
+      ...imgSnapSharedOptions,
+      customSnapshotIdentifier: 'App-Rotate-5_Right90',
+    });
+
+    pressKey('x');
+    expect(getCanvasImage(canvas)).toMatchImageSnapshot({
+      ...imgSnapSharedOptions,
+      customSnapshotIdentifier: 'App-Rotate-6_Right180',
+    });
+
+    pressKey('x');
+    expect(getCanvasImage(canvas)).toMatchImageSnapshot({
+      ...imgSnapSharedOptions,
+      customSnapshotIdentifier: 'App-Rotate-7_Right270',
+    });
+
+    pressKey('x');
+    expect(getCanvasImage(canvas)).toMatchImageSnapshot({
+      ...imgSnapSharedOptions,
+      customSnapshotIdentifier: 'App-Rotate-8_RightToStart',
+    });
+  });
 });
