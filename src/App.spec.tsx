@@ -5,6 +5,7 @@ import renderWithRedux from '@/testutils/renderWithRedux';
 import getCanvasImage from '@/testutils/getCanvasImage';
 import parseZeta from '@/testutils/parseZeta';
 import { MatchImageSnapshotOptions } from 'jest-image-snapshot';
+import { appRotateTestData } from '@/App.specdata';
 
 function pressKey(key: string) {
   fireEvent.keyDown(document, { key });
@@ -178,65 +179,47 @@ describe('App component', () => {
     });
   });
 
-  it('should properly handle rotating a piece in both directions', () => {
-    // Render app
-    setup('X/X/X/X/X/X/X/X/3AAAA3/X/X/X/X/X/X/X/X/X/X/O2OOOO3/OOOOOOOOO1 I 0 - 3 OTSLJZZIOTLSJ');
-    const canvas = screen.getByTestId<HTMLCanvasElement>('canvas');
+  describe('piece rotation', () => {
+    appRotateTestData.forEach(({ type, zeta, rotations, altTestName }) => {
+      it(altTestName ?? `should work properly for ${type}-piece`, () => {
+        // Track number of rotations done for snapshot names
+        let rotationsDone = 0;
 
-    // Get initial snapshot
-    expect(getCanvasImage(canvas)).toMatchImageSnapshot({
-      ...imgSnapSharedOptions,
-      customSnapshotIdentifier: 'App-Rotate-0_Initial',
-    });
+        // Render app
+        setup(zeta);
+        const canvas = screen.getByTestId<HTMLCanvasElement>('canvas');
 
-    // Snapshot rotation all the way around counterclockwise
-    pressKey('z');
-    expect(getCanvasImage(canvas)).toMatchImageSnapshot({
-      ...imgSnapSharedOptions,
-      customSnapshotIdentifier: 'App-Rotate-1_Left90',
-    });
+        // Get initial snapshot of board
+        expect(getCanvasImage(canvas)).toMatchImageSnapshot({
+          ...imgSnapSharedOptions,
+          customSnapshotIdentifier: `App-Rotate${type}-0_Initial`,
+        });
 
-    pressKey('z');
-    expect(getCanvasImage(canvas)).toMatchImageSnapshot({
-      ...imgSnapSharedOptions,
-      customSnapshotIdentifier: 'App-Rotate-2_Left180',
-    });
+        // Perform specified number of rotations counter-clockwise
+        const rotationRange = Array.from({ length: rotations }, (_, index) => index + 1);
 
-    pressKey('z');
-    expect(getCanvasImage(canvas)).toMatchImageSnapshot({
-      ...imgSnapSharedOptions,
-      customSnapshotIdentifier: 'App-Rotate-3_Left270',
-    });
+        rotationRange.forEach((rotationNum) => {
+          pressKey('z');
+          rotationsDone += 1;
 
-    pressKey('z');
-    expect(getCanvasImage(canvas)).toMatchImageSnapshot({
-      ...imgSnapSharedOptions,
-      customSnapshotIdentifier: 'App-Rotate-4_LeftToStart',
-    });
+          // Snapshot each rotation
+          expect(getCanvasImage(canvas)).toMatchImageSnapshot({
+            ...imgSnapSharedOptions,
+            customSnapshotIdentifier: `App-Rotate${type}-${rotationsDone}_Left${rotationNum * 90}`,
+          });
+        });
 
-    // Snapshot rotation all the way around clockwise
-    pressKey('x');
-    expect(getCanvasImage(canvas)).toMatchImageSnapshot({
-      ...imgSnapSharedOptions,
-      customSnapshotIdentifier: 'App-Rotate-5_Right90',
-    });
+        // Perform the same number of rotations clockwise
+        rotationRange.forEach((rotationNum) => {
+          pressKey('x');
+          rotationsDone += 1;
 
-    pressKey('x');
-    expect(getCanvasImage(canvas)).toMatchImageSnapshot({
-      ...imgSnapSharedOptions,
-      customSnapshotIdentifier: 'App-Rotate-6_Right180',
-    });
-
-    pressKey('x');
-    expect(getCanvasImage(canvas)).toMatchImageSnapshot({
-      ...imgSnapSharedOptions,
-      customSnapshotIdentifier: 'App-Rotate-7_Right270',
-    });
-
-    pressKey('x');
-    expect(getCanvasImage(canvas)).toMatchImageSnapshot({
-      ...imgSnapSharedOptions,
-      customSnapshotIdentifier: 'App-Rotate-8_RightToStart',
+          expect(getCanvasImage(canvas)).toMatchImageSnapshot({
+            ...imgSnapSharedOptions,
+            customSnapshotIdentifier: `App-Rotate${type}-${rotationsDone}_Right${rotationNum * 90}`,
+          });
+        });
+      });
     });
   });
 });
