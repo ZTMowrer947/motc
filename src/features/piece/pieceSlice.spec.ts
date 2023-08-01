@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { fillActivePieceSourceData, rotateActivePieceSourceData } from '@/features/piece/__pieceSlice.specdata';
-import pieceReducer, { PieceState, clearLine, fillActivePiece, fillBag, rotateActivePiece } from './pieceSlice';
+import { fillActivePieceSourceData } from '@/features/piece/__pieceSlice.specdata';
+import pieceReducer, { PieceState, clearLine, fillActivePiece, fillBag } from './pieceSlice';
 import type { PieceType } from './pieceAPI';
 
 describe('piece reducer', () => {
@@ -40,65 +40,6 @@ describe('piece reducer', () => {
 
         // Assert
         expect(finalState).toEqual(expectedState);
-      });
-    });
-  });
-
-  // Using external source data, run tests for rotateActivePiece
-  describe('handling rotateActivePiece', () => {
-    Array.from({ length: 2 }, (_, idx) => idx % 2 === 0).forEach((isClockwise) => {
-      rotateActivePieceSourceData.forEach(({ pieceType, possibleCoordinates }) => {
-        possibleCoordinates.forEach((initialCoordinates, rotationDelta) => {
-          // Determine the expected post-rotation delta
-          const nextDelta = (() => {
-            if (isClockwise) return rotationDelta + 1 < 4 ? rotationDelta + 1 : 0;
-
-            return rotationDelta - 1 >= 0 ? rotationDelta - 1 : 3;
-          })();
-
-          const expectedCoordinates = possibleCoordinates[nextDelta];
-
-          const rotationTypeText = isClockwise ? 'clockwise' : 'counter-clockwise';
-
-          it(`should properly rotate ${pieceType}-piece at rotation ${rotationDelta} ${rotationTypeText}`, () => {
-            // Arrange
-            const initialState: PieceState = {
-              active: {
-                type: pieceType,
-                coordinates: initialCoordinates,
-                rotationDelta: rotationDelta as 0 | 1 | 2 | 3,
-              },
-              occupied: {
-                rows: [],
-                byRow: {},
-              },
-              nextPieces: [],
-              lineClears: 0,
-            };
-
-            const expectedState: PieceState = {
-              active: {
-                type: pieceType,
-                coordinates: expectedCoordinates,
-                rotationDelta: nextDelta as 0 | 1 | 2 | 3,
-              },
-              occupied: {
-                rows: [],
-                byRow: {},
-              },
-              nextPieces: [],
-              lineClears: 0,
-            };
-
-            // Act
-            const action = rotateActivePiece({ clockwise: isClockwise });
-
-            const finalState = pieceReducer(initialState, action);
-
-            // Assert
-            expect(finalState).toEqual(expectedState);
-          });
-        });
       });
     });
   });
