@@ -5,7 +5,7 @@ import renderWithRedux from '@/testutils/renderWithRedux';
 import getCanvasImage from '@/testutils/getCanvasImage';
 import parseZeta from '@/testutils/parseZeta';
 import { MatchImageSnapshotOptions } from 'jest-image-snapshot';
-import { appRotateTestData } from '@/App.specdata';
+import { appLineClearTestData, appRotateTestData } from '@/App.specdata';
 
 function pressKey(key: string) {
   fireEvent.keyDown(document, { key });
@@ -155,27 +155,31 @@ describe('App component', () => {
     });
   });
 
-  it('should properly handle clearing a line', async () => {
-    // Setup spy of RAF function
-    const rafSpy = vi.spyOn(window, 'requestAnimationFrame');
+  describe('line clearing', () => {
+    appLineClearTestData.forEach(({ zeta, testName, snapLabel }) => {
+      it(testName, async () => {
+        // Setup spy of RAF function
+        const rafSpy = vi.spyOn(window, 'requestAnimationFrame');
 
-    // Render app
-    setup('X/X/X/X/X/X/X/X/X/X/X/X/X/X/X/X/X/9A/9A/O2OOOO2A/OOOOOOOOOA I 0 - 3 OTSLJZZIOTLSJ');
-    const canvas = screen.getByTestId<HTMLCanvasElement>('canvas');
+        // Render app
+        setup(zeta);
+        const canvas = screen.getByTestId<HTMLCanvasElement>('canvas');
 
-    // Get initial snapshot
-    expect(getCanvasImage(canvas)).toMatchImageSnapshot({
-      ...imgSnapSharedOptions,
-      customSnapshotIdentifier: 'App-LineClear-0_Initial',
-    });
+        // Get initial snapshot
+        expect(getCanvasImage(canvas)).toMatchImageSnapshot({
+          ...imgSnapSharedOptions,
+          customSnapshotIdentifier: `App-LineClear-${snapLabel}-0_Initial`,
+        });
 
-    // Wait for next board update
-    await waitFor(() => expect(rafSpy.mock.calls.length).toBeGreaterThanOrEqual(20));
+        // Wait for next board update
+        await waitFor(() => expect(rafSpy.mock.calls.length).toBeGreaterThanOrEqual(20));
 
-    // Expect line clear counter to update and for rows to update correctly
-    expect(getCanvasImage(canvas)).toMatchImageSnapshot({
-      ...imgSnapSharedOptions,
-      customSnapshotIdentifier: 'App-LineClear-1_Single',
+        // Expect line clear counter to update and for rows to update correctly
+        expect(getCanvasImage(canvas)).toMatchImageSnapshot({
+          ...imgSnapSharedOptions,
+          customSnapshotIdentifier: `App-LineClear-${snapLabel}-1_Final`,
+        });
+      });
     });
   });
 

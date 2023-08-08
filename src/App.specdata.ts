@@ -7,6 +7,12 @@ export interface AppRotateTestEntry {
   altTestName?: string;
 }
 
+export interface AppLineClearTestEntry {
+  zeta: string;
+  testName: string;
+  snapLabel: string;
+}
+
 export const appRotateTestData: AppRotateTestEntry[] = [
   {
     type: 'I',
@@ -43,5 +49,33 @@ export const appRotateTestData: AppRotateTestEntry[] = [
     type: 'Z',
     zeta: 'X/X/X/X/X/X/X/X/4AA4/5AA3/X/X/X/X/X/X/X/X/X/O2OOOO3/OOOOOOOOO1 Z 0 - 3 ZIOTLSJIOTSL',
     rotations: 4,
+  },
+];
+
+export const appLineClearTestData: AppLineClearTestEntry[] = [
+  {
+    zeta: 'X/X/X/X/X/X/X/X/X/X/X/X/X/X/X/X/X/9A/9A/O2OOOO2A/OOOOOOOOOA I 0 - 3 OTSLJZZIOTLSJ',
+    testName: 'should properly handle a single',
+    snapLabel: 'Single',
+  },
+  {
+    zeta: 'X/X/X/X/X/X/X/X/X/X/X/X/X/X/X/X/X/9A/O2OOOO2A/OOOOOOOOOA/OOOOOOOOOA I 0 - 3 OTSLJZZIOTLSJ',
+    testName: 'should properly handle a double',
+    snapLabel: 'Double',
+  },
+  {
+    zeta: 'X/X/X/X/X/X/X/X/X/X/X/X/X/X/X/X/X/O2OOOO2A/OOOOOOOOOA/OOOOOOOOOA/OOOOOOOOOA I 0 - 3 OTSLJZZIOTLSJ',
+    testName: 'should properly handle a triple',
+    snapLabel: 'Triple',
+  },
+  {
+    zeta: 'X/X/X/X/X/X/X/X/X/X/X/X/X/X/X/X/O2OOOO3/OOOOOOOOOA/OOOOOOOOOA/OOOOOOOOOA/OOOOOOOOOA I 0 - 3 OTSLJZZIOTLSJ',
+    testName: 'should properly handle a tetris',
+    snapLabel: 'Tetris',
+  },
+  {
+    zeta: 'X/X/X/X/X/X/X/X/X/X/X/X/X/X/X/X/O2OOOO3/OOOOOOOOOA/1OOOOOOOOA/OOOOOOOOOA/OOOO1OOOOA I 0 - 3 OTSLJZZIOTLSJ',
+    testName: 'should probably handle clearing two disjoint lines',
+    snapLabel: 'DisjointDouble',
   },
 ];
