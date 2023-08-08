@@ -37,6 +37,8 @@ const pieceSlice = createSlice({
       byRow: {} as CoordinateMap,
       rows: [] as number[],
     },
+    heldPiece: null as PieceType | null,
+    canHoldPiece: true,
     nextPieces: [] as PieceType[],
     lineClears: 0,
   },
@@ -170,6 +172,9 @@ const pieceSlice = createSlice({
 
         // Unset active piece to make way for the next
         state.active = null;
+
+        // Re-enable piece holding
+        state.canHoldPiece = true;
       }
     },
     clearLine(state, { payload }: PayloadAction<ClearLinePayload>) {
@@ -194,12 +199,34 @@ const pieceSlice = createSlice({
       // Increment line clear counter
       state.lineClears += 1;
     },
+    holdActivePiece(state) {
+      // If there is no active piece, or if holding is unavailable, do nothing
+      if (!state.active || !state.canHoldPiece) return;
+
+      // If a piece was previously held, configure it to be the next piece sent out
+      if (state.heldPiece) {
+        state.nextPieces.unshift(state.heldPiece);
+      }
+
+      // Update the held piece type and usability
+      state.canHoldPiece = false;
+      state.heldPiece = state.active.type;
+
+      state.active = null;
+    },
   },
 });
 
 // Actions
-export const { fillActivePiece, translateActivePiece, rotateActivePiece, fillBag, lockActivePiece, clearLine } =
-  pieceSlice.actions;
+export const {
+  fillActivePiece,
+  translateActivePiece,
+  rotateActivePiece,
+  fillBag,
+  lockActivePiece,
+  clearLine,
+  holdActivePiece,
+} = pieceSlice.actions;
 
 // Selectors
 export const selectActiveColumnsByRow = (state: RootState) => state.piece.active?.coordinates.byRow;
@@ -225,6 +252,8 @@ export const selectOccupiedCoordinates = createSelector(
 export const selectFilledRows = createSelector([selectOccupiedColumnsByRow, selectOccupiedRows], (byRow, rows) =>
   rows.filter((row) => byRow[row].length === 10)
 );
+
+export const selectHeldPiece = (state: RootState) => state.piece.heldPiece ?? undefined;
 
 // Thunks
 export function fillActivePieceWithBagRefill(): AppThunk {
@@ -348,6 +377,21 @@ export function clearFilledLines(): AppThunk<number> {
     } while (filledRows.length > 0); // Keep going until every filled line is cleared
 
     return filledRows.length;
+  };
+}
+
+export function holdAndUpdateActivePiece(): AppThunk<boolean> {
+  return (dispatch, getState) => {
+    const state = getState();
+
+    const shouldHold = state.piece.canHoldPiece && !!state.piece.active;
+
+    if (shouldHold) {
+      dispatch(holdActivePiece());
+      dispatch(fillActivePieceWithBagRefill());
+    }
+
+    return shouldHold;
   };
 }
 

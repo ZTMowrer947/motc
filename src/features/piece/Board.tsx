@@ -14,11 +14,17 @@ export interface BoardProps {
   linesCleared: number;
   // nextPieces: PieceType[];
   // canHoldActivePiece: boolean;
-  // heldPiece?: PieceType;
+  heldPiece?: PieceType;
   handleAutoMoveDown(): void;
 }
 
-export default function Board({ activePiece, occupiedCoordinates, linesCleared, handleAutoMoveDown }: BoardProps) {
+export default function Board({
+  activePiece,
+  occupiedCoordinates,
+  linesCleared,
+  handleAutoMoveDown,
+  heldPiece,
+}: BoardProps) {
   // Calculate dimensions of canvas
   const height = window.innerHeight - 50;
   const width = height / 2 + 400;
@@ -57,8 +63,12 @@ export default function Board({ activePiece, occupiedCoordinates, linesCleared, 
       ctx.fillText('Hold', 10, 50);
       ctx.fillText('Next', ctx.canvas.height + 90, 50);
       ctx.fillText(`Lines: ${linesCleared}`, 10, 350);
+
+      if (heldPiece) {
+        ctx.fillText(heldPiece, 25, 70);
+      }
     },
-    [activePiece, handleAutoMoveDown, linesCleared, occupiedCoordinates, sideLength]
+    [activePiece, handleAutoMoveDown, linesCleared, occupiedCoordinates, sideLength, heldPiece]
   );
 
   return <Canvas height={height} width={width} draw={draw} />;

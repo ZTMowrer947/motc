@@ -12,6 +12,8 @@ import {
   tryTranslateActivePiece,
   fillActivePieceWithBagRefill,
   selectFilledRows,
+  holdAndUpdateActivePiece,
+  selectHeldPiece,
 } from './features/piece/pieceSlice';
 import useKeyListener from './app/hooks/useKeyListener';
 
@@ -21,6 +23,7 @@ function App() {
   const occupiedCoordinates = useAppSelector(selectOccupiedCoordinates);
   const filledLines = useAppSelector(selectFilledRows);
   const lineClears = useAppSelector((state) => state.piece.lineClears);
+  const heldPiece = useAppSelector(selectHeldPiece);
   const dispatch = useAppDispatch();
 
   const activePiece = useMemo(
@@ -71,12 +74,18 @@ function App() {
     { noHold: true }
   );
 
+  // Piece holding
+  useKeyListener(['Shift', 'c'], () => {
+    dispatch(holdAndUpdateActivePiece());
+  });
+
   return (
     <Board
       activePiece={activePiece}
       occupiedCoordinates={occupiedCoordinates}
       linesCleared={lineClears}
       handleAutoMoveDown={handleAutoMoveDown}
+      heldPiece={heldPiece}
     />
   );
 }
