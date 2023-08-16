@@ -299,3 +299,48 @@ export function getPieceColor(type: PieceType) {
 
   return `rgb(${colors.join(', ')}`;
 }
+
+export const firstNextPieceCoordinates: Record<PieceType, Coordinate[]> = {
+  I: [
+    { row: 17, col: 13 },
+    { row: 17, col: 14 },
+    { row: 17, col: 15 },
+    { row: 17, col: 16 },
+  ],
+  O: [
+    { row: 16, col: 13 },
+    { row: 16, col: 14 },
+    { row: 17, col: 13 },
+    { row: 17, col: 14 },
+  ],
+  T: [
+    { row: 16, col: 13 },
+    { row: 16, col: 14 },
+    { row: 16, col: 15 },
+    { row: 17, col: 14 },
+  ],
+  L: [
+    { row: 16, col: 13 },
+    { row: 16, col: 14 },
+    { row: 16, col: 15 },
+    { row: 17, col: 15 },
+  ],
+  J: [
+    { row: 16, col: 13 },
+    { row: 16, col: 14 },
+    { row: 16, col: 15 },
+    { row: 17, col: 13 },
+  ],
+  S: [
+    { row: 16, col: 13 },
+    { row: 16, col: 14 },
+    { row: 17, col: 15 },
+    { row: 17, col: 14 },
+  ],
+  Z: [
+    { row: 17, col: 13 },
+    { row: 16, col: 14 },
+    { row: 16, col: 15 },
+    { row: 17, col: 14 },
+  ],
+};

@@ -3,18 +3,17 @@ import type { Coordinate } from '@/features/coordinate/types';
 import { useCallback } from 'react';
 import Canvas from '@/features/drawing/Canvas';
 
-export interface ActivePiece {
+export interface PieceData {
   type: PieceType;
   coordinates: Coordinate[];
 }
 
 export interface BoardProps {
-  activePiece?: ActivePiece;
+  activePiece?: PieceData;
   occupiedCoordinates: Coordinate[];
   linesCleared: number;
-  // nextPieces: PieceType[];
-  // canHoldActivePiece: boolean;
-  heldPiece?: PieceType;
+  nextPieces: PieceData[];
+  // heldPiece?: PieceType;
   handleAutoMoveDown(): void;
 }
 
@@ -23,7 +22,7 @@ export default function Board({
   occupiedCoordinates,
   linesCleared,
   handleAutoMoveDown,
-  heldPiece,
+  nextPieces,
 }: BoardProps) {
   // Calculate dimensions of canvas
   const height = window.innerHeight - 50;
@@ -61,14 +60,25 @@ export default function Board({
       ctx.font = '20px sans-serif';
       ctx.fillStyle = 'white';
       ctx.fillText('Hold', 10, 50);
-      ctx.fillText('Next', ctx.canvas.height + 90, 50);
+      ctx.fillText('Next', ctx.canvas.height + 60, sideLength);
       ctx.fillText(`Lines: ${linesCleared}`, 10, 350);
 
-      if (heldPiece) {
-        ctx.fillText(heldPiece, 25, 70);
-      }
+      ctx.fillStyle = 'black';
+      ctx.fillRect(200 - sideLength * 8, sideLength * 3, sideLength * 6, sideLength * 4);
+      ctx.fillRect(
+        200 + ctx.canvas.height / 2 + sideLength * 2,
+        sideLength * 2,
+        sideLength * 6,
+        ctx.canvas.height - sideLength * 2
+      );
+
+      nextPieces.forEach((piece) => {
+        piece.coordinates.forEach(({ row, col }) => {
+          drawSquare(ctx, getPieceColor(piece.type), row, col, sideLength);
+        });
+      });
     },
-    [activePiece, handleAutoMoveDown, linesCleared, occupiedCoordinates, sideLength, heldPiece]
+    [activePiece, handleAutoMoveDown, nextPieces, linesCleared, occupiedCoordinates, sideLength]
   );
 
   return <Canvas height={height} width={width} draw={draw} />;

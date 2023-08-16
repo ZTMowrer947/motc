@@ -13,7 +13,7 @@ import {
   fillActivePieceWithBagRefill,
   selectFilledRows,
   holdAndUpdateActivePiece,
-  selectHeldPiece,
+  selectNextSevenPieces,
 } from './features/piece/pieceSlice';
 import useKeyListener from './app/hooks/useKeyListener';
 
@@ -23,7 +23,7 @@ function App() {
   const occupiedCoordinates = useAppSelector(selectOccupiedCoordinates);
   const filledLines = useAppSelector(selectFilledRows);
   const lineClears = useAppSelector((state) => state.piece.lineClears);
-  const heldPiece = useAppSelector(selectHeldPiece);
+  const nextPieces = useAppSelector(selectNextSevenPieces);
   const dispatch = useAppDispatch();
 
   const activePiece = useMemo(
@@ -84,8 +84,8 @@ function App() {
       activePiece={activePiece}
       occupiedCoordinates={occupiedCoordinates}
       linesCleared={lineClears}
+      nextPieces={nextPieces}
       handleAutoMoveDown={handleAutoMoveDown}
-      heldPiece={heldPiece}
     />
   );
 }

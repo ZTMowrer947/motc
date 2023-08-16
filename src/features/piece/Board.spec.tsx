@@ -5,6 +5,7 @@ import { render, waitFor, screen } from '@testing-library/react';
 import Board, { BoardProps } from '@/features/piece/Board';
 import getCanvasImage from '@/testutils/getCanvasImage';
 import { MatchImageSnapshotOptions } from 'jest-image-snapshot';
+import { firstNextPieceCoordinates, PieceType } from '@/features/piece/pieceAPI';
 
 const imgSnapSharedOptions: MatchImageSnapshotOptions = {
   comparisonMethod: 'ssim',
@@ -14,6 +15,7 @@ describe('Board component', () => {
   it('should properly render an empty board', () => {
     const props: BoardProps = {
       occupiedCoordinates: [],
+      nextPieces: [],
       linesCleared: 0,
       handleAutoMoveDown: vi.fn(),
     };
@@ -29,6 +31,16 @@ describe('Board component', () => {
   });
 
   it('should properly render a game in progress', () => {
+    const nextPieceTypes = 'OTSLJZZIOTLSJ'.split('') as PieceType[];
+    const nextPieces = nextPieceTypes.map((type, index) => {
+      const coordinates = firstNextPieceCoordinates[type].map(({ row, col }) => ({
+        row: row - 3 * index,
+        col,
+      }));
+
+      return { type, coordinates };
+    });
+
     const props: BoardProps = {
       occupiedCoordinates: [
         { row: 1, col: 0 },
@@ -64,6 +76,7 @@ describe('Board component', () => {
           { row: 11, col: 6 },
         ],
       },
+      nextPieces,
       linesCleared: 4,
       handleAutoMoveDown: vi.fn(),
     };
@@ -90,6 +103,7 @@ describe('Board component', () => {
           { row: 4, col: 8 },
         ],
       },
+      nextPieces: [],
       occupiedCoordinates: [],
       linesCleared: 0,
       handleAutoMoveDown: vi.fn(),

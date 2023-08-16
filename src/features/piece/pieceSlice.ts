@@ -2,7 +2,13 @@ import { createSelector, createSlice, PayloadAction } from '@reduxjs/toolkit';
 import type { RootState, AppThunk } from '@/app/store';
 import { coordCollectionToArray } from '@/features/coordinate/helpers';
 import { shuffle } from '@/features/rng/randomAPI';
-import { arePieceCoordinatesValid, canTranslatePiece, PieceType, rotatePiece } from './pieceAPI';
+import {
+  arePieceCoordinatesValid,
+  canTranslatePiece,
+  firstNextPieceCoordinates,
+  PieceType,
+  rotatePiece,
+} from './pieceAPI';
 import type { CoordinateCollection, CoordinateMap } from '../coordinate/types';
 
 // Types
@@ -254,6 +260,18 @@ export const selectFilledRows = createSelector([selectOccupiedColumnsByRow, sele
 );
 
 export const selectHeldPiece = (state: RootState) => state.piece.heldPiece ?? undefined;
+
+export const selectNextPieceTypes = (state: RootState) => state.piece.nextPieces;
+export const selectNextSevenPieceTypes = createSelector(selectNextPieceTypes, (nextPieces) => nextPieces.slice(0, 7));
+export const selectNextSevenPieces = createSelector(selectNextSevenPieceTypes, (pieceTypes) =>
+  pieceTypes.map((pieceType, index) => ({
+    type: pieceType,
+    coordinates: firstNextPieceCoordinates[pieceType].map(({ row, col }) => ({
+      row: row - 3 * index,
+      col,
+    })),
+  }))
+);
 
 // Thunks
 export function fillActivePieceWithBagRefill(): AppThunk {
