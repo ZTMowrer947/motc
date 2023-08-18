@@ -5,7 +5,7 @@ import { render, waitFor, screen } from '@testing-library/react';
 import Board, { BoardProps } from '@/features/piece/Board';
 import getCanvasImage from '@/testutils/getCanvasImage';
 import { MatchImageSnapshotOptions } from 'jest-image-snapshot';
-import { firstNextPieceCoordinates, PieceType } from '@/features/piece/pieceAPI';
+import { firstNextPieceCoordinates, getHeldPieceCoordinates, PieceType } from '@/features/piece/pieceAPI';
 
 const imgSnapSharedOptions: MatchImageSnapshotOptions = {
   comparisonMethod: 'ssim',
@@ -77,6 +77,10 @@ describe('Board component', () => {
         ],
       },
       nextPieces,
+      heldPiece: {
+        type: 'S',
+        coordinates: getHeldPieceCoordinates('S'),
+      },
       linesCleared: 4,
       handleAutoMoveDown: vi.fn(),
     };

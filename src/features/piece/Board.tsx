@@ -13,7 +13,7 @@ export interface BoardProps {
   occupiedCoordinates: Coordinate[];
   linesCleared: number;
   nextPieces: PieceData[];
-  // heldPiece?: PieceType;
+  heldPiece?: PieceData;
   handleAutoMoveDown(): void;
 }
 
@@ -22,6 +22,7 @@ export default function Board({
   occupiedCoordinates,
   linesCleared,
   handleAutoMoveDown,
+  heldPiece,
   nextPieces,
 }: BoardProps) {
   // Calculate dimensions of canvas
@@ -63,6 +64,7 @@ export default function Board({
       ctx.fillText('Next', ctx.canvas.height + 60, sideLength);
       ctx.fillText(`Lines: ${linesCleared}`, 10, 350);
 
+      // Draw boxes for held piece and next piece
       ctx.fillStyle = 'black';
       ctx.fillRect(200 - sideLength * 8, sideLength * 3, sideLength * 6, sideLength * 4);
       ctx.fillRect(
@@ -72,13 +74,21 @@ export default function Board({
         ctx.canvas.height - sideLength * 2
       );
 
+      // Draw held piece if one is being held
+      if (heldPiece) {
+        heldPiece.coordinates.forEach(({ row, col }) => {
+          drawSquare(ctx, getPieceColor(heldPiece.type), row, col, sideLength);
+        });
+      }
+
+      // Draw next pieces
       nextPieces.forEach((piece) => {
         piece.coordinates.forEach(({ row, col }) => {
           drawSquare(ctx, getPieceColor(piece.type), row, col, sideLength);
         });
       });
     },
-    [activePiece, handleAutoMoveDown, nextPieces, linesCleared, occupiedCoordinates, sideLength]
+    [activePiece, handleAutoMoveDown, nextPieces, heldPiece, linesCleared, occupiedCoordinates, sideLength]
   );
 
   return <Canvas height={height} width={width} draw={draw} />;

@@ -6,6 +6,7 @@ import {
   arePieceCoordinatesValid,
   canTranslatePiece,
   firstNextPieceCoordinates,
+  getHeldPieceCoordinates,
   PieceType,
   rotatePiece,
 } from './pieceAPI';
@@ -259,7 +260,15 @@ export const selectFilledRows = createSelector([selectOccupiedColumnsByRow, sele
   rows.filter((row) => byRow[row].length === 10)
 );
 
-export const selectHeldPiece = (state: RootState) => state.piece.heldPiece ?? undefined;
+export const selectHeldPieceType = (state: RootState) => state.piece.heldPiece ?? undefined;
+export const selectHeldPiece = createSelector(selectHeldPieceType, (type) =>
+  type
+    ? {
+        type,
+        coordinates: getHeldPieceCoordinates(type),
+      }
+    : undefined
+);
 
 export const selectNextPieceTypes = (state: RootState) => state.piece.nextPieces;
 export const selectNextSevenPieceTypes = createSelector(selectNextPieceTypes, (nextPieces) => nextPieces.slice(0, 7));

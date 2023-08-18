@@ -344,3 +344,10 @@ export const firstNextPieceCoordinates: Record<PieceType, Coordinate[]> = {
     { row: 17, col: 14 },
   ],
 };
+
+export function getHeldPieceCoordinates(type: PieceType) {
+  return firstNextPieceCoordinates[type].map(({ row, col }) => ({
+    row: row - 1,
+    col: col - 20,
+  }));
+}
