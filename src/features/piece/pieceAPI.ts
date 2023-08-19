@@ -244,8 +244,8 @@ export function drawSquare(ctx: CanvasRenderingContext2D, color: string, row: nu
   ctx.lineWidth = 1;
 
   // Calculate actual coordinates for canvas
-  const realX = 200 + col * sideLength;
-  const realY = (20 - row) * sideLength;
+  const realX = (7 + col) * sideLength;
+  const realY = (22 - row) * sideLength;
 
   // Draw square with outline
   ctx.fillRect(realX, realY, sideLength, sideLength);
@@ -302,52 +302,52 @@ export function getPieceColor(type: PieceType) {
 
 export const firstNextPieceCoordinates: Record<PieceType, Coordinate[]> = {
   I: [
-    { row: 17, col: 13 },
-    { row: 17, col: 14 },
-    { row: 17, col: 15 },
-    { row: 17, col: 16 },
+    { row: 19, col: 12 },
+    { row: 19, col: 13 },
+    { row: 19, col: 14 },
+    { row: 19, col: 15 },
   ],
   O: [
-    { row: 16, col: 13 },
-    { row: 16, col: 14 },
-    { row: 17, col: 13 },
-    { row: 17, col: 14 },
+    { row: 18, col: 12 },
+    { row: 18, col: 13 },
+    { row: 19, col: 12 },
+    { row: 19, col: 13 },
   ],
   T: [
-    { row: 16, col: 13 },
-    { row: 16, col: 14 },
-    { row: 16, col: 15 },
-    { row: 17, col: 14 },
+    { row: 18, col: 12 },
+    { row: 18, col: 13 },
+    { row: 18, col: 14 },
+    { row: 19, col: 13 },
   ],
   L: [
-    { row: 16, col: 13 },
-    { row: 16, col: 14 },
-    { row: 16, col: 15 },
-    { row: 17, col: 15 },
+    { row: 18, col: 12 },
+    { row: 18, col: 13 },
+    { row: 18, col: 14 },
+    { row: 19, col: 14 },
   ],
   J: [
-    { row: 16, col: 13 },
-    { row: 16, col: 14 },
-    { row: 16, col: 15 },
-    { row: 17, col: 13 },
+    { row: 18, col: 12 },
+    { row: 18, col: 13 },
+    { row: 18, col: 14 },
+    { row: 19, col: 12 },
   ],
   S: [
-    { row: 16, col: 13 },
-    { row: 16, col: 14 },
-    { row: 17, col: 15 },
-    { row: 17, col: 14 },
+    { row: 18, col: 12 },
+    { row: 18, col: 13 },
+    { row: 19, col: 14 },
+    { row: 19, col: 13 },
   ],
   Z: [
-    { row: 17, col: 13 },
-    { row: 16, col: 14 },
-    { row: 16, col: 15 },
-    { row: 17, col: 14 },
+    { row: 19, col: 12 },
+    { row: 18, col: 13 },
+    { row: 18, col: 14 },
+    { row: 19, col: 13 },
   ],
 };
 
 export function getHeldPieceCoordinates(type: PieceType) {
   return firstNextPieceCoordinates[type].map(({ row, col }) => ({
     row: row - 1,
-    col: col - 20,
+    col: col - 18,
   }));
 }

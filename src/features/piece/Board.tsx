@@ -27,8 +27,8 @@ export default function Board({
 }: BoardProps) {
   // Calculate dimensions of canvas
   const height = window.innerHeight - 50;
-  const width = height / 2 + 400;
-  const sideLength = height / 20;
+  const width = height;
+  const sideLength = height / 24;
 
   const draw = useCallback(
     (ctx: CanvasRenderingContext2D, frame: number) => {
@@ -36,7 +36,7 @@ export default function Board({
       ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
       ctx.fillStyle = 'rgba(0, 0, 0)';
 
-      ctx.fillRect(200, 0, ctx.canvas.height / 2, ctx.canvas.height);
+      ctx.fillRect(sideLength * 7, sideLength * 2, sideLength * 10, sideLength * 20);
 
       // Move active piece down every 20th frame
       if (frame % 20 === 19) {
@@ -61,18 +61,12 @@ export default function Board({
       ctx.font = '20px sans-serif';
       ctx.fillStyle = 'white';
       ctx.fillText('Hold', 10, 50);
-      ctx.fillText('Next', ctx.canvas.height + 60, sideLength);
       ctx.fillText(`Lines: ${linesCleared}`, 10, 350);
 
       // Draw boxes for held piece and next piece
       ctx.fillStyle = 'black';
-      ctx.fillRect(200 - sideLength * 8, sideLength * 3, sideLength * 6, sideLength * 4);
-      ctx.fillRect(
-        200 + ctx.canvas.height / 2 + sideLength * 2,
-        sideLength * 2,
-        sideLength * 6,
-        ctx.canvas.height - sideLength * 2
-      );
+      ctx.fillRect(0, sideLength * 3, sideLength * 6, sideLength * 4);
+      ctx.fillRect(sideLength * 18, sideLength * 2, sideLength * 6, ctx.canvas.height - sideLength * 2);
 
       // Draw held piece if one is being held
       if (heldPiece) {
